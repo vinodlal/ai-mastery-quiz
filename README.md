@@ -48,21 +48,29 @@ npm run preview    # serves the built app at http://localhost:4173
 iOS requires a **secure context (HTTPS)** for the service worker, so plain
 `http://<pc-ip>:4173` over Wi-Fi will install but won't work offline. Two good options:
 
-### Option A — free static host (simplest, recommended)
+### Option A — GitHub Pages (DEPLOYED — this is the live setup)
 
-The app is pure static files; hosting it publicly does NOT expose your data —
-all progress lives only in your device's IndexedDB.
+**Live URL: https://vinodlal.github.io/ai-mastery-quiz/**
 
-1. `npm run build`
-2. Create a free account at https://app.netlify.com (or Cloudflare Pages / GitHub Pages).
-3. Netlify → **Add new site → Deploy manually** → drag the `dist` folder in.
-4. You get an HTTPS URL like `https://something.netlify.app`.
-5. **iPhone (Safari)**: open the URL → Share button → **Add to Home Screen** → Add.
-6. **iPad (Safari)**: same. **Android tablet (Chrome)**: open URL → ⋮ menu → **Add to Home screen** / "Install app".
-7. Open the icon once while online (precaches everything), then it works fully offline —
-   test with Airplane Mode.
+- Source repo: https://github.com/vinodlal/ai-mastery-quiz (public; app code + quiz
+  content only — progress data never leaves the device)
+- Hosting serves static files only; all progress lives in each device's IndexedDB.
 
-To update the app later: `npm run build`, drag `dist` in again.
+**iPhone (Safari)**: open the URL → Share button → **Add to Home Screen** → Add.
+**iPad (Safari)**: same. **Android tablet (Chrome)**: open URL → ⋮ → **Add to Home screen** / "Install app".
+Open the installed icon once while online (precaches everything), then it works fully
+offline — test with Airplane Mode.
+
+To ship an update later:
+
+```powershell
+cd "C:\My Learning APP- Claude"
+npm run build
+cd dist
+git add -A; git commit -m "update"; git push --force https://github.com/vinodlal/ai-mastery-quiz.git gh-pages
+```
+
+Installed apps pick the update up automatically the next time they're opened online.
 
 ### Option B — fully local over your Wi-Fi (no internet hosting)
 
