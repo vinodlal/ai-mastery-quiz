@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import QuestionCard from "../components/QuestionCard.jsx";
-import { questionsByConcept, conceptById } from "../lib/store.js";
-import { masteryPercent } from "../lib/scheduler.js";
+import { questionsByConcept, conceptById, QUESTIONS } from "../lib/store.js";
+import { masteryPercent, pickReviewQuestion } from "../lib/scheduler.js";
 
-// Review Queue: quizzes every due concept. Wrong answers go to the back of
-// the queue (SM-2 re-queues them the same day); correct answers reschedule.
+// Review Queue: quizzes every due concept. Practice alternates between the
+// concept's base question and unlocked cross-concept scenarios that include it.
+// Wrong answers go to the back of the queue (SM-2 re-queues them the same day).
 export default function ReviewQueue({ app, go }) {
   const [queue, setQueue] = useState(null); // array of concept ids
   const [count, setCount] = useState(0);
@@ -21,12 +22,12 @@ export default function ReviewQueue({ app, go }) {
           {due.length === 0 ? (
             <>
               <h3>Queue clear ✅</h3>
-              <p>No reviews due right now. Correct answers push concepts further into the future; wrong answers bring them back the same day.</p>
+              <p>No reviews due right now. Correct answers push topics further into the future; wrong answers bring them back the same day. Repeat topics sometimes appear as cross-concept scenarios.</p>
               <button className="btn btn-primary" onClick={() => go("home")}>Dashboard</button>
             </>
           ) : (
             <>
-              <h3>{due.length} concept{due.length === 1 ? "" : "s"} due</h3>
+              <h3>{due.length} topic{due.length === 1 ? "" : "s"} due</h3>
               <ul className="concept-list">
                 {due.slice(0, 8).map((s) => {
                   const c = conceptById[s.conceptId];
@@ -63,12 +64,17 @@ export default function ReviewQueue({ app, go }) {
   }
 
   const conceptId = queue[0];
-  const q = questionsByConcept[conceptId][0];
+  const state = app.states[conceptId];
+  const q = pickReviewQuestion(conceptId, state, questionsByConcept, QUESTIONS, app.derived.currentDay);
   const concept = conceptById[conceptId];
+  const isScenario = q.kind === "scenario";
 
   return (
     <div className="screen">
-      <header className="apphead"><h1>Review</h1><span className="subtitle">{queue.length} left · {concept.name}</span></header>
+      <header className="apphead">
+        <h1>Review</h1>
+        <span className="subtitle">{queue.length} left · {isScenario ? `🧩 scenario (${concept.name})` : concept.name}</span>
+      </header>
       <QuestionCard
         key={`${conceptId}-${qKey}`}
         question={q}
@@ -78,21 +84,19 @@ export default function ReviewQueue({ app, go }) {
           const ok = await app.answerQuestion(q, idx, "review");
           setLastCorrect(ok);
         }}
-        onNext={async () => {
+        onNext={() => {
           setCount((c) => c + 1);
           setQueue((qu) => {
             const rest = qu.slice(1);
-            const next = lastCorrect ? rest : [...rest, conceptId];
-            return next;
+            return lastCorrect ? rest : [...rest, conceptId];
           });
           setQKey((k) => k + 1);
           setLastCorrect(null);
-          await app.checkDailyGoal();
         }}
         nextLabel="Next"
       />
       <div className="card hint">
-        <p>💡 Wrong answers return to the end of today's queue. Master a concept with 3 correct answers on 3 different days.</p>
+        <p>💡 Wrong answers return to the end of today's queue. Mastery = 3 correct answers on 3 different days.</p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import QuestionCard from "../components/QuestionCard.jsx";
 import { QUESTIONS, CONCEPTS, conceptById } from "../lib/store.js";
-import { ASSESSMENT, sampleQuestions, levelPassed, proficiencyPercent } from "../lib/scheduler.js";
+import { ASSESSMENT, sampleLevelQuestions, levelPassed, proficiencyPercent } from "../lib/scheduler.js";
 
 // 30-minute final assessment: 3 progressive levels, 10 minutes each.
 // L1 recall (pass >=90%), L2 applied (>=85%), L3 expert incl. enhancement (>=80%).
@@ -20,7 +20,7 @@ export default function FinalTest({ app }) {
 
   function startLevel(idx) {
     const c = ASSESSMENT.levels[idx];
-    const qs = sampleQuestions(QUESTIONS, c.difficulty, c.questions);
+    const qs = sampleLevelQuestions(QUESTIONS, c);
     setLevelIdx(idx);
     setLevelQs(qs);
     setQi(0);
@@ -100,11 +100,12 @@ export default function FinalTest({ app }) {
             </tbody>
           </table>
           <p className="csec">
-            {ASSESSMENT.levels.map((l) => l.questions).join(" + ")} questions. Each level must be passed to unlock the next.
-            The timer keeps running while you read explanations. Unanswered questions count as wrong when time runs out.
+            {ASSESSMENT.levels.map((l) => l.questions).join(" + ")} questions — each level mixes topic questions with 🧩 cross-concept scenarios.
+            Each level must be passed to unlock the next. The timer keeps running while you read explanations.
+            Unanswered questions count as wrong when time runs out.
           </p>
-          {app.derived.day < 21 && (
-            <p className="update-note">You're on day {app.derived.day} of 21 — you can take the test now, but it's designed for after the course.</p>
+          {!app.derived.courseComplete && (
+            <p className="update-note">You're on lesson {app.derived.currentDay} of 21 — you can take the test now, but it's designed for after the course.</p>
           )}
           <button className="btn btn-primary" onClick={() => { setLevelResults([]); startLevel(0); }}>Start Level 1</button>
         </div>

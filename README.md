@@ -4,9 +4,11 @@ A personal, single-user quiz & spaced-repetition app generated from your two lea
 documents (`AI_TECHNICAL_GLOSSARY.md` + `SW_Engineering_and_Agentic_AI_Guide.md`).
 
 - **169 concepts** (133 from your source + 36 web-researched 2026 enhancements)
-- **169 MCQs**, every concept covered, each with a full why-right/why-wrong explanation
-- **21-day curriculum**: days 1–7 foundational, 8–14 applied, 15–21 expert + all enhancement topics
-- **Simplified SM-2 spaced repetition**: wrong → re-queued the same day; correct → 1 day → 3 days → growing interval. Mastery = 3 consecutive correct answers on 3 different days.
+- **202 MCQs**: 169 topic questions (every concept covered) + **33 cross-concept scenario questions**, each with a full why-right/why-wrong explanation
+- **Institute-style sequential course**: 21 lessons in 5 parts following the documents section by section (Part 1 AI & RAG Foundations → Part 2 Retrieval & Systems → Part 3 Software Engineering → Part 4 Agentic AI → Part 5 2026 Frontier)
+- **Study mode**: each lesson is Study (read the day's topics) → Quiz (exactly those topics, in order, ending with the day's scenarios)
+- **Self-paced**: finishing a lesson unlocks the next day — one per day or binge ahead
+- **Simplified SM-2 spaced repetition**: wrong → re-queued the same day; correct → 1 day → 3 days → growing interval. Mastery = 3 consecutive correct answers on 3 different days. Review practice alternates topic questions with unlocked scenarios.
 - **30-minute final assessment**: 3 levels × 10 min, pass gates 90% / 85% / 80%
 - **All data in IndexedDB** on the device. No backend, no login, no analytics, zero runtime network calls.
 - **Export / Import progress as JSON** (Settings) — your backup against iOS Safari's ~7-day storage eviction.

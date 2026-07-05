@@ -21,6 +21,7 @@ export default function QuestionCard({ question, index, total, onAnswered, onNex
           {question.difficulty === 1 ? "Foundational" : question.difficulty === 2 ? "Applied" : "Expert"}
         </span>
         {question.source_type === "enhancement" && <span className="badge badge-enh">2026 topic</span>}
+        {question.kind === "scenario" && <span className="badge badge-scn">🧩 scenario</span>}
       </div>
       <h2 className="qtext">{question.question_text}</h2>
       <div className="options">

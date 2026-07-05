@@ -37,7 +37,7 @@ export default function Progress({ app }) {
     return true;
   });
 
-  const phaseNames = { 1: "Foundational (days 1–7)", 2: "Applied (days 8–14)", 3: "Expert (days 15–21)" };
+  const phaseNames = { 1: "Foundational questions", 2: "Applied questions", 3: "Expert questions" };
 
   return (
     <div className="screen">

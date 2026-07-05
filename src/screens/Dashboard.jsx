@@ -1,44 +1,25 @@
 import React from "react";
-import { CONCEPTS } from "../lib/store.js";
+import { partTitle, scenariosByDay, lessonQuestions } from "../lib/store.js";
 
 export default function Dashboard({ app, go }) {
-  const { derived, meta, settings } = app;
-  const { day, due, newList, todayLog, masteredCount, introducedCount, totalConcepts } = derived;
-  const phase = day <= 7 ? "Foundational" : day <= 14 ? "Applied" : "Expert & Integration";
-  const goalNewTarget = Math.min(settings.newPerDay, todayLog.newDone + newList.length);
-  const goalDone = todayLog.goalMet;
-
-  // learning streak = consecutive calendar days (ending today or yesterday) with goalMet
-  const streak = (() => {
-    const dates = Object.entries(meta.dailyLog).filter(([, v]) => v.goalMet).map(([d]) => d).sort();
-    if (!dates.length) return 0;
-    let n = 0;
-    let cur = new Date();
-    for (;;) {
-      const s = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-      if (dates.includes(s)) { n++; cur.setDate(cur.getDate() - 1); }
-      else if (n === 0 && dates.length) { // allow streak counted from yesterday if today not done yet
-        cur.setDate(cur.getDate() - 1);
-        const y = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-        if (!dates.includes(y)) return 0;
-      } else return n;
-    }
-  })();
-
-  const todaysConcepts = newList.slice(0, settings.newPerDay);
+  const { derived } = app;
+  const { currentDay, courseComplete, lesson, due, masteredCount, introducedCount, totalConcepts, streak, todayLog } = derived;
 
   return (
     <div className="screen">
       <header className="apphead">
         <h1>AI Mastery</h1>
-        <span className="subtitle">21-day quiz coach · offline</span>
+        <span className="subtitle">21-lesson course · self-paced · offline</span>
       </header>
 
       <div className="card hero">
         <div className="hero-row">
           <div>
-            <div className="hero-day">Day {day} <span className="hero-of">/ 21</span></div>
-            <div className={`phasechip phase-${day <= 7 ? 1 : day <= 14 ? 2 : 3}`}>{phase}</div>
+            <div className="hero-day">Day {courseComplete ? 21 : currentDay} <span className="hero-of">/ 21</span></div>
+            {!courseComplete && (
+              <div className={`phasechip phase-${Math.min(3, lesson.part)}`}>Part {lesson.part} · {partTitle(lesson.part)}</div>
+            )}
+            {courseComplete && <div className="phasechip phase-3">Course complete 🎓</div>}
           </div>
           <div className="ring" style={{ "--pct": Math.round((masteredCount / totalConcepts) * 100) }}>
             <span>{Math.round((masteredCount / totalConcepts) * 100)}%</span>
@@ -46,53 +27,48 @@ export default function Dashboard({ app, go }) {
           </div>
         </div>
         <div className="statrow">
-          <div className="stat"><b>{introducedCount}</b><span>seen</span></div>
+          <div className="stat"><b>{introducedCount}</b><span>topics seen</span></div>
           <div className="stat"><b>{masteredCount}</b><span>mastered</span></div>
           <div className="stat"><b>{streak}</b><span>day streak</span></div>
         </div>
       </div>
 
-      <div className="card">
-        <h3>Today's goal</h3>
-        <ul className="goal-list">
-          <li className={due.length === 0 ? "done" : ""}>
-            {due.length === 0 ? "✅" : "🔁"} Clear due reviews
-            {due.length > 0 ? ` — ${due.length} waiting` : " — done"}
-          </li>
-          <li className={todayLog.newDone >= goalNewTarget && goalNewTarget > 0 ? "done" : goalNewTarget === 0 ? "done" : ""}>
-            {todayLog.newDone >= goalNewTarget ? "✅" : "📝"} Learn {goalNewTarget} new concept{goalNewTarget === 1 ? "" : "s"} — {todayLog.newDone}/{goalNewTarget}
-          </li>
-        </ul>
-        {goalDone && <p className="goal-done-msg">🎉 Daily goal complete — Day {day > 1 ? day - 1 : day} logged. See you tomorrow!</p>}
-        <div className="btnrow">
-          <button className="btn btn-primary" onClick={() => go("quiz")} disabled={newList.length === 0}>
-            {newList.length === 0 ? "No new concepts left" : "Start Daily Quiz"}
-          </button>
-          <button className="btn" onClick={() => go("review")} disabled={due.length === 0}>
-            Review ({due.length})
-          </button>
-        </div>
-      </div>
-
-      {todaysConcepts.length > 0 && (
+      {!courseComplete && (
         <div className="card">
-          <h3>Up next today</h3>
-          <ul className="concept-list">
-            {todaysConcepts.map((c) => (
-              <li key={c.id}>
-                <span className="cname">{c.name}</span>
-                <span className="csec">{c.sections[0]}</span>
-              </li>
-            ))}
-          </ul>
+          <h3>Current lesson</h3>
+          <h2 className="lesson-title">Day {currentDay}: {lesson.title}</h2>
+          <p className="csec">{lesson.sections.join(" · ")}</p>
+          <p>
+            📖 Study {lesson.concept_ids.length} topics, then a {lessonQuestions(currentDay).length}-question quiz
+            {(scenariosByDay[currentDay] || []).length > 0 ? ` ending with ${(scenariosByDay[currentDay] || []).length} cross-concept scenario${(scenariosByDay[currentDay] || []).length === 1 ? "" : "s"}` : ""}.
+            Finish it to unlock Day {Math.min(21, currentDay + 1)}.
+          </p>
+          <button className="btn btn-primary btn-block" onClick={() => go("learn")}>
+            {derived.lessonStudied ? "Continue" : "Start"} Day {currentDay}
+          </button>
         </div>
       )}
 
-      {day >= 21 && (
-        <div className="card">
-          <h3>Course complete?</h3>
-          <p>You've reached the end of the 21-day plan. Take the 30-minute final assessment.</p>
-          <button className="btn btn-primary" onClick={() => go("test")}>Go to Final Test</button>
+      <div className="card">
+        <h3>Reviews</h3>
+        {due.length === 0 ? (
+          <p>✅ Review queue is clear. Correct answers return in growing intervals; misses come back the same day.</p>
+        ) : (
+          <p>🔁 {due.length} topic{due.length === 1 ? "" : "s"} due — clearing them keeps the spaced-repetition schedule honest.</p>
+        )}
+        <div className="btnrow">
+          <button className="btn" onClick={() => go("review")} disabled={due.length === 0}>
+            Review ({due.length})
+          </button>
+          {courseComplete && (
+            <button className="btn btn-primary" onClick={() => go("test")}>Final Test</button>
+          )}
+        </div>
+      </div>
+
+      {todayLog.answers > 0 && (
+        <div className="card hint">
+          <p>Today: {todayLog.answers} answer{todayLog.answers === 1 ? "" : "s"} · {todayLog.lessons} lesson{todayLog.lessons === 1 ? "" : "s"} completed · {todayLog.reviewsDone} review{todayLog.reviewsDone === 1 ? "" : "s"}</p>
         </div>
       )}
     </div>

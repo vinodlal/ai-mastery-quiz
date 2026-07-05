@@ -116,6 +116,37 @@ export function sampleQuestions(questions, difficulty, n, rand = Math.random) {
   return arr.slice(0, n);
 }
 
+// Final-test level sample: weaves cross-concept scenarios into every level —
+// up to 4 scenarios (of the level's difficulty), the rest single-concept questions.
+export function sampleLevelQuestions(questions, levelCfg, rand = Math.random) {
+  const shuffle = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const scen = shuffle(questions.filter((q) => q.kind === "scenario" && q.difficulty === levelCfg.difficulty)).slice(0, 4);
+  const rest = shuffle(questions.filter((q) => q.kind === "concept" && q.difficulty === levelCfg.difficulty)).slice(0, levelCfg.questions - scen.length);
+  return shuffle([...scen, ...rest]);
+}
+
+// Review weaving: once a concept has been answered correctly at least once,
+// alternate its practice between the base question and linked scenarios that
+// are already unlocked (taught on or before the learner's current day).
+export function pickReviewQuestion(conceptId, state, questionsByConcept, allQuestions, currentDay) {
+  const base = questionsByConcept[conceptId][0];
+  if (!state || state.reps < 1) return base;
+  const linked = allQuestions.filter(
+    (q) => q.kind === "scenario" && q.concept_ids.includes(conceptId) && q.day_assigned <= currentDay
+  );
+  if (linked.length === 0) return base;
+  // rotate: base, scenario, base, scenario... keyed by total attempts
+  if (state.attempts % 2 === 1) return linked[Math.floor(state.attempts / 2) % linked.length];
+  return base;
+}
+
 export function levelPassed(levelCfg, correct, total) {
   if (total === 0) return false;
   return (correct / total) * 100 >= levelCfg.passPct;
