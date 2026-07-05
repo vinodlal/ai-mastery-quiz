@@ -1,0 +1,2072 @@
+{
+  "meta": {
+    "generated": "2026-07-04",
+    "sources": [
+      "D:/Learnings  AI/AI_TECHNICAL_GLOSSARY.md",
+      "D:/Learnings  AI/SW_Engineering_and_Agentic_AI_Guide.md"
+    ],
+    "note": "PDF files verified to be exports of the two markdown sources. phase: 1=foundational (days 1-7), 2=applied (days 8-14), 3=expert/integration (days 15-21).",
+    "enhancement_meta": {
+      "researched": "2026-07-04",
+      "method": "Web searches (July 2026) per topic area; concepts an expert would expect beyond the source docs. All tagged source_type=enhancement, curriculum phase 3 (days 15-21).",
+      "key_sources": [
+        "https://www.digitalapplied.com/blog/rag-chunking-strategies-2026-retrieval-quality-playbook",
+        "https://mixpeek.com/curated-lists/best-embedding-models",
+        "https://zylos.ai/research/2026-01-15-llm-inference-optimization/",
+        "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+        "https://callsphere.ai/blog/vector-database-benchmarks-2026-pgvector-qdrant-weaviate-milvus-lancedb",
+        "https://futureagi.com/blog/llm-fine-tuning-techniques-i-ii/",
+        "https://www.braintrust.dev/articles/best-rag-evaluation-tools",
+        "https://futureagi.com/blog/best-rerankers-for-rag-2026/",
+        "https://presenc.ai/research/multi-agent-orchestration-frameworks-2026",
+        "https://www.taskade.com/blog/reasoning-models"
+      ]
+    },
+    "total_concepts": 169
+  },
+  "concepts": [
+    {
+      "id": "src-001",
+      "name": "Artificial Intelligence (AI)",
+      "sections": [
+        "Glossary §1 Foundation"
+      ],
+      "phase": 1,
+      "summary": "Systems performing tasks that normally need human intelligence; modern AI is neural networks trained on massive datasets — sophisticated pattern matching.",
+      "source_type": "source",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-002",
+      "name": "Neural Network",
+      "sections": [
+        "Glossary §1 Foundation"
+      ],
+      "phase": 1,
+      "summary": "Layered mathematical structure of weights adjusted during training so the network predicts outputs from inputs (Input → Layer 1 → ... → Output).",
+      "source_type": "source",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-003",
+      "name": "Training vs Inference",
+      "sections": [
+        "Glossary §1 Foundation"
+      ],
+      "phase": 1,
+      "summary": "Training adjusts billions of weights on data+answers (expensive, occasional); inference runs the trained model to answer (cheap, every query — what Ollama does locally).",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-004",
+      "name": "Parameters / Weights",
+      "sections": [
+        "Glossary §1 Foundation"
+      ],
+      "phase": 1,
+      "summary": "The numbers inside a neural network; a '7B model' has 7 billion. More parameters = more patterns learnable but more RAM/VRAM and slower.",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-005",
+      "name": "LLM (Large Language Model)",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Transformer trained to predict the next token; from that one task on internet-scale data it learns grammar, facts, reasoning, code. Generates one token at a time using the context window.",
+      "source_type": "source",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-006",
+      "name": "Transformer Architecture",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "The 2017 Google architecture behind all modern LLMs; key innovation is self-attention — every token can attend to every other token in context.",
+      "source_type": "source",
+      "day_assigned": 6
+    },
+    {
+      "id": "src-007",
+      "name": "Self-Attention",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Mechanism scoring each word against every other word so relevant words link up (resolves 'it' = the cat, not the mat).",
+      "source_type": "source",
+      "day_assigned": 7
+    },
+    {
+      "id": "src-008",
+      "name": "Context Window",
+      "sections": [
+        "Glossary §2 Language Models & LLMs",
+        "Guide §15 Memory in AI Systems"
+      ],
+      "phase": 1,
+      "summary": "Max text an LLM holds in working memory at once (qwen2.5:14b ≈128K tokens; BGE-large 512 tokens/chunk). Beyond it, earlier content is forgotten.",
+      "source_type": "source",
+      "update_2026": "2026 update: frontier context windows reach 1M+ tokens, fueling the 'long context vs RAG' debate — long context wins for multi-step reasoning over bounded docs, RAG for scale and freshness.",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-009",
+      "name": "Tokens",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Basic LLM unit, roughly a word-piece. ~1 token ≈ 0.75 words; 1 page ≈ 750 tokens.",
+      "source_type": "source",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-010",
+      "name": "Tokenization (BPE / WordPiece / SentencePiece)",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Converting text to tokens before the model sees it; different models use different tokenizers (BGE-large uses WordPiece, max 512 tokens — longer text truncated).",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-011",
+      "name": "Temperature",
+      "sections": [
+        "Glossary §2 Language Models & LLMs",
+        "Guide §12 The ReAct Pattern"
+      ],
+      "phase": 1,
+      "summary": "Randomness control: 0.0 deterministic, 0.7 balanced, 1.0+ creative. Agents use ~0.1 so structured THOUGHT/ACTION output stays reliable.",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-012",
+      "name": "Quantization (FP16 / Q4 / GGUF)",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Compressing a model by lowering weight precision: FP16 ≈2 bytes/param, Q4 ≈0.5 (4x smaller); 70B at 2-bit fits ~22GB RAM. Smaller/faster but slightly less accurate.",
+      "source_type": "source",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-013",
+      "name": "RLHF (Reinforcement Learning from Human Feedback)",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Post-training where humans rate outputs and the model learns to produce higher-rated responses — makes LLMs helpful and safe (ChatGPT, Claude, instruction-tuned models).",
+      "source_type": "source",
+      "update_2026": "2026 update: DPO-family methods (DPO/IPO/KTO/ORPO/GRPO) have largely replaced the classic RLHF PPO pipeline as the default preference-alignment approach.",
+      "day_assigned": 6
+    },
+    {
+      "id": "src-014",
+      "name": "Ollama",
+      "sections": [
+        "Glossary §2 Language Models & LLMs"
+      ],
+      "phase": 1,
+      "summary": "Local LLM runtime exposing an HTTP API at localhost:11434; runs GGUF quantized models, auto-uses GPU, no internet required.",
+      "source_type": "source",
+      "day_assigned": 7
+    },
+    {
+      "id": "src-015",
+      "name": "Embedding",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space"
+      ],
+      "phase": 1,
+      "summary": "Converting text/images to a vector of numbers representing meaning; similar meanings land close together ('dog' and 'puppy' vectors nearly identical).",
+      "source_type": "source",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-016",
+      "name": "Embedding Model (BGE-large-en-v1.5)",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space"
+      ],
+      "phase": 1,
+      "summary": "Network trained only to produce good embeddings (not generate text). BGE-large: 1024-dim, contrastive learning on text pairs, uses a query prefix for retrieval.",
+      "source_type": "source",
+      "update_2026": "2026 update: BGE-large-en-v1.5 is no longer the open-source leader — BGE-M3, NV-Embed-v2, Gemini Embedding, Voyage and mxbai-embed-large top MTEB retrieval in 2026.",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-017",
+      "name": "Cosine Similarity",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space"
+      ],
+      "phase": 1,
+      "summary": "Angle-based vector similarity: 1.0 identical meaning, 0 unrelated, -1 opposite. cos(θ) = (A·B)/(|A|×|B|). Used for retrieval, cache hits (0.92), MMR.",
+      "formula": "cos(θ) = (A · B) / (|A| × |B|)",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-018",
+      "name": "Vector Space",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space"
+      ],
+      "phase": 1,
+      "summary": "The N-dimensional space embeddings live in (BGE 1024-dim, CLIP 512-dim); similar content clusters, so search = nearest neighbours.",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-019",
+      "name": "CLIP (Contrastive Language-Image Pretraining)",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space"
+      ],
+      "phase": 1,
+      "summary": "OpenAI 2021 model embedding text AND images into the same vector space via image-caption pairs — enables text→image and image→image search (clip-ViT-B-32, 512-dim).",
+      "source_type": "source",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-020",
+      "name": "Sentence Transformers library",
+      "sections": [
+        "Glossary §3 Embeddings & Vector Space",
+        "Glossary §14 Infrastructure & Frameworks"
+      ],
+      "phase": 1,
+      "summary": "Python library (UKP Lab) wrapping embedding models like BGE and CLIP: model.encode([text]) → numpy array.",
+      "source_type": "source",
+      "day_assigned": 6
+    },
+    {
+      "id": "src-021",
+      "name": "RAG (Retrieval-Augmented Generation)",
+      "sections": [
+        "Glossary §4 RAG"
+      ],
+      "phase": 1,
+      "summary": "Give LLMs external knowledge: chunk → embed → store; at query time embed the query, fetch similar chunks, add to prompt, generate. Lewis et al. (Meta), 2020.",
+      "source_type": "source",
+      "update_2026": "2026 update: production RAG has evolved toward agentic RAG (retrieval in a reasoning loop), GraphRAG for multi-hop questions, and hybrid long-context+RAG designs.",
+      "day_assigned": 7
+    },
+    {
+      "id": "src-022",
+      "name": "RAG vs Fine-tuning",
+      "sections": [
+        "Glossary §4 RAG"
+      ],
+      "phase": 1,
+      "summary": "Fine-tuning bakes knowledge into weights (expensive, static); RAG retrieves fresh content at query time (cheap, dynamic, always current) — better for knowledge.",
+      "source_type": "source",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-023",
+      "name": "Chunking (size + overlap)",
+      "sections": [
+        "Glossary §4 RAG",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 1,
+      "summary": "Splitting documents before embedding (512 words, 128-word overlap). Overlap keeps sentences spanning boundaries intact; needed for token limits and precision.",
+      "source_type": "source",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-024",
+      "name": "Section-Aware Chunking",
+      "sections": [
+        "Glossary §4 RAG",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 2,
+      "summary": "Split by document structure (headings) before word count so chunks carry their section name ('3. AVAILABILITY'), not just a page number.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-025",
+      "name": "Chunk Metadata",
+      "sections": [
+        "Glossary §4 RAG",
+        "Guide §3 Database Design"
+      ],
+      "phase": 1,
+      "summary": "Data stored beside each chunk: source, title, section, page, content_type (text/image/table) — enables filtering and citations.",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-026",
+      "name": "Vector Database",
+      "sections": [
+        "Glossary §5 Vector Databases"
+      ],
+      "phase": 1,
+      "summary": "Database optimised for storing/searching high-dimensional vectors with specialised indexes — SQL can't do nearest-neighbour in 1024-dim efficiently.",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-027",
+      "name": "LanceDB",
+      "sections": [
+        "Glossary §5 Vector Databases"
+      ],
+      "phase": 1,
+      "summary": "Rust vector DB with Python bindings: columnar storage, dual vectors per row, hybrid search, persistent .lance files, serverless (~8ms/query vs ~45ms ChromaDB).",
+      "source_type": "source",
+      "update_2026": "2026 update: LanceDB's recognised niche is edge/desktop/embedded; pgvector is the common default (≤50M vectors), Qdrant/Milvus for dedicated or billion-scale serving.",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-028",
+      "name": "ChromaDB",
+      "sections": [
+        "Glossary §5 Vector Databases"
+      ],
+      "phase": 1,
+      "summary": "SQLite-based vector DB the project replaced with LanceDB — simpler but slower, no native hybrid search, no dual vectors.",
+      "source_type": "source",
+      "day_assigned": 6
+    },
+    {
+      "id": "src-029",
+      "name": "HNSW (Hierarchical Navigable Small World)",
+      "sections": [
+        "Glossary §5 Vector Databases",
+        "Guide §3 Database Design"
+      ],
+      "phase": 2,
+      "summary": "Multi-layer graph index for fast approximate vector search: start sparse at top, zoom into denser layers (continent→country→city). O(log N), ~99%+ accurate.",
+      "source_type": "source",
+      "update_2026": "2026 update: HNSW remains standard, but IVF-PQ variants and pgvector 0.9's improved IVFFlat are common at scale for memory reasons.",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-030",
+      "name": "Approximate Nearest Neighbour (ANN)",
+      "sections": [
+        "Glossary §5 Vector Databases"
+      ],
+      "phase": 1,
+      "summary": "Finding 'close enough' vectors without checking every one; HNSW is one algorithm — others: IVF, FAISS, ScaNN. Trades exactness for speed.",
+      "source_type": "source",
+      "day_assigned": 7
+    },
+    {
+      "id": "src-031",
+      "name": "Dual-Vector Schema",
+      "sections": [
+        "Glossary §5 Vector Databases",
+        "Guide §3 Database Design",
+        "Guide §16 Multi-Modal AI"
+      ],
+      "phase": 2,
+      "summary": "Each row holds text_vector (1024-dim BGE, meaning) and image_vector (512-dim CLIP, visual) — same chunk findable by text query OR visual similarity; image fields nullable.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-032",
+      "name": "Persistence / Durable Storage",
+      "sections": [
+        "Glossary §5 Vector Databases",
+        "Guide §4 Caching Strategies"
+      ],
+      "phase": 1,
+      "summary": "LanceDB writes to disk immediately (lance_db/<category>/rag.lance); data survives restarts and reboots — no in-memory-only mode.",
+      "source_type": "source",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-033",
+      "name": "Semantic Search",
+      "sections": [
+        "Glossary §6 Retrieval Techniques"
+      ],
+      "phase": 1,
+      "summary": "Finding content by meaning, not exact words — 'how does scaling work?' matches 'horizontal vs vertical scale-out'. Powered by embeddings + cosine similarity.",
+      "source_type": "source",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-034",
+      "name": "Keyword / Full-Text Search (FTS)",
+      "sections": [
+        "Glossary §6 Retrieval Techniques",
+        "Glossary §13 Search & Indexing"
+      ],
+      "phase": 1,
+      "summary": "Traditional exact-word/stem search ranked by BM25. Catches exact terms semantic search misses; misses synonyms.",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-035",
+      "name": "Hybrid Search",
+      "sections": [
+        "Glossary §6 Retrieval Techniques",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 2,
+      "summary": "Vector (semantic) + keyword (FTS) fused in one query — semantic finds meaning, keyword finds literal values like '99.99%'.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-036",
+      "name": "Multi-Query Retrieval",
+      "sections": [
+        "Glossary §6 Retrieval Techniques"
+      ],
+      "phase": 2,
+      "summary": "Run 3 phrasings (original, key-terms-only, domain-boosted) and merge — catches content expressed differently from how the user asked.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-037",
+      "name": "Reciprocal Rank Fusion (RRF)",
+      "sections": [
+        "Glossary §6 Retrieval Techniques"
+      ],
+      "phase": 2,
+      "summary": "Merge multiple ranked lists fairly: score = Σ 1/(rank+60) across lists; the 60 stops top items dominating. Consistent mid-rankers beat one-list wonders.",
+      "formula": "score = Σ 1/(rank + 60)",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-038",
+      "name": "MMR (Maximum Marginal Relevance)",
+      "sections": [
+        "Glossary §6 Retrieval Techniques",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 2,
+      "summary": "Diversity-aware selection: score = λ×relevance − (1−λ)×max similarity to already-picked (λ=0.5) — five different angles instead of five copies.",
+      "formula": "score = λ × relevance − (1−λ) × max_sim_to_selected",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-039",
+      "name": "Table-Aware Routing",
+      "sections": [
+        "Glossary §6 Retrieval Techniques"
+      ],
+      "phase": 3,
+      "summary": "Queries mentioning table/chart/list/comparison boost content_type='table' chunks to the front so structured questions get structured data.",
+      "source_type": "source",
+      "day_assigned": 15
+    },
+    {
+      "id": "src-040",
+      "name": "Factual Anchor Injection",
+      "sections": [
+        "Glossary §6 Retrieval Techniques",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 3,
+      "summary": "Post-retrieval fix for specific facts: detect patterns (99.XX%), score pool candidates for co-occurrence of the value + a time figure, inject the best match into results.",
+      "source_type": "source",
+      "day_assigned": 16
+    },
+    {
+      "id": "src-041",
+      "name": "Two-Stage Retrieval (bi-encoder → cross-encoder)",
+      "sections": [
+        "Glossary §7 Re-ranking"
+      ],
+      "phase": 2,
+      "summary": "Stage 1: bi-encoder embeds query and chunk separately — fast, less nuanced. Stage 2: cross-encoder reads the pair together — slow but accurate, on a small candidate set.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-042",
+      "name": "Cross-Encoder",
+      "sections": [
+        "Glossary §7 Re-ranking",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 2,
+      "summary": "Model scoring a (query, document) pair read together through attention — much more accurate than vector compare but O(N) per query. ms-marco-MiniLM-L-6-v2, trained on MS MARCO.",
+      "source_type": "source",
+      "update_2026": "2026 update: ms-marco-MiniLM is dated — BGE-Reranker-v2-m3, Cohere Rerank 4, and jina-reranker-v3 are current; late-interaction (ColBERT) sits between bi- and cross-encoders.",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-043",
+      "name": "BM25",
+      "sections": [
+        "Glossary §7 Re-ranking",
+        "Glossary §13 Search & Indexing"
+      ],
+      "phase": 2,
+      "summary": "'Best Match 25' keyword ranking: term frequency × inverse document frequency with document-length normalisation. Improved TF-IDF; basis of most FTS.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-044",
+      "name": "Multimodal AI",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI",
+        "Guide §16 Multi-Modal AI"
+      ],
+      "phase": 2,
+      "summary": "AI processing multiple input types (text+images+audio). LLaVA = language+vision; CLIP = image+text in one space.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-045",
+      "name": "LLaVA (Large Language and Vision Assistant)",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI",
+        "Guide §16 Multi-Modal AI"
+      ],
+      "phase": 2,
+      "summary": "Open multimodal model: CLIP vision encoder → projection layer → Llama/Vicuna LLM. Takes image+prompt, outputs description; used for charts/diagrams; ~2-5s per image via Ollama.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-046",
+      "name": "Vision Encoder",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI"
+      ],
+      "phase": 2,
+      "summary": "Network converting an image to a fixed vector (LLaVA uses CLIP's ViT, 768-dim) projected into the LLM's token space so the LLM can 'see'.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-047",
+      "name": "ViT (Vision Transformer)",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI"
+      ],
+      "phase": 2,
+      "summary": "Transformer on images: split into patches, each patch a 'token', then self-attention. ViT-B/32 = base size, 32×32-pixel patches.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-048",
+      "name": "OCR vs Vision AI",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI",
+        "Guide §16 Multi-Modal AI"
+      ],
+      "phase": 2,
+      "summary": "OCR extracts text via pattern matching (fast, clean print only); Vision AI (LLaVA) understands meaning — describes charts, explains diagrams — slower but far more capable.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-049",
+      "name": "Base64 Encoding",
+      "sections": [
+        "Glossary §8 Vision & Multimodal AI"
+      ],
+      "phase": 2,
+      "summary": "Binary→ASCII conversion so images travel over JSON/HTTP (needed for Ollama API); ~33% size overhead, so resize to 1024px first.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-050",
+      "name": "AI Agent (agentic properties)",
+      "sections": [
+        "Glossary §9 Agents & Tool Use",
+        "Guide §11 What Makes an AI Agentic"
+      ],
+      "phase": 2,
+      "summary": "LLM that takes actions in a loop until done: autonomous, goal-directed, tool-using, multi-step, self-correcting, observable — beyond single-turn Q&A.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-051",
+      "name": "ReAct Pattern",
+      "sections": [
+        "Glossary §9 Agents & Tool Use",
+        "Guide §12 The ReAct Pattern"
+      ],
+      "phase": 2,
+      "summary": "Reason+Act alternation (Yao et al. 2022): THOUGHT → ACTION → INPUT → OBSERVATION, repeat, then FINAL_ANSWER. Like a detective reasoning between clues.",
+      "source_type": "source",
+      "update_2026": "2026 update: text-parsed ReAct (THOUGHT/ACTION via regex) is legacy in production — native function calling APIs and MCP-standardised tools are the norm; the reason-act loop concept itself lives on.",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-052",
+      "name": "Tool / Skill",
+      "sections": [
+        "Glossary §9 Agents & Tool Use",
+        "Guide §13 Tool Use & Skill Design"
+      ],
+      "phase": 2,
+      "summary": "A callable function defined by name, description (the LLM reads it to decide usage), parameters, implementation. The project has 15 skills (web_search, rag_query, calculator, ...).",
+      "source_type": "source",
+      "update_2026": "2026 update: tool definitions are being standardised by MCP (Model Context Protocol), now under the Linux Foundation with support from all major AI vendors.",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-053",
+      "name": "Prompt Engineering",
+      "sections": [
+        "Glossary §9 Agents & Tool Use",
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 2,
+      "summary": "Designing instruction text: role, current date/time, skill list with examples, exact format rules, behavioural rules. Bad prompt = unpredictable agent.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-054",
+      "name": "Structured Output",
+      "sections": [
+        "Glossary §9 Agents & Tool Use"
+      ],
+      "phase": 2,
+      "summary": "Making the LLM emit machine-parseable output; the project extracts ACTION/INPUT/THOUGHT/FINAL_ANSWER with regex, made reliable by temperature 0.1 + explicit format rules.",
+      "source_type": "source",
+      "update_2026": "2026 update: constrained decoding / structured-output APIs guarantee schema-valid JSON, replacing 'low temperature + format rules + regex' reliability tricks.",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-055",
+      "name": "Chain of Thought (CoT)",
+      "sections": [
+        "Glossary §9 Agents & Tool Use"
+      ],
+      "phase": 2,
+      "summary": "Model explains reasoning step by step ('thinks out loud'), improving accuracy on complex tasks; the ReAct THOUGHT field implements it naturally.",
+      "source_type": "source",
+      "update_2026": "2026 update: chain-of-thought has been trained into dedicated reasoning models (o3, Claude extended thinking, DeepSeek R1) that spend test-time compute on private thinking tokens.",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-056",
+      "name": "Semantic Cache",
+      "sections": [
+        "Glossary §10 Memory & Caching",
+        "Guide §4 Caching Strategies"
+      ],
+      "phase": 2,
+      "summary": "Store past Q&A as vectors; a new question with cosine ≥0.92 to a stored one returns the cached answer (~10ms vs 10-120s LLM time). Matches by meaning, not exact string.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-057",
+      "name": "Similarity Threshold (0.92)",
+      "sections": [
+        "Glossary §10 Memory & Caching",
+        "Guide §4 Caching Strategies"
+      ],
+      "phase": 2,
+      "summary": "Cache-hit cutoff: higher = fewer false hits but missed paraphrases; lower = more hits but wrong-answer risk. 0.92 matches rephrasings, rejects different questions.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-058",
+      "name": "Semantic Staleness",
+      "sections": [
+        "Glossary §10 Memory & Caching",
+        "Guide §4 Caching Strategies"
+      ],
+      "phase": 2,
+      "summary": "Cached time-sensitive answers rot ('NIFTY price today' from 30 days ago is wrong). Detect via keywords (today/price/news/latest) and warn based on cache age.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-059",
+      "name": "Persistent Memory (cache in LanceDB)",
+      "sections": [
+        "Glossary §10 Memory & Caching",
+        "Guide §15 Memory in AI Systems"
+      ],
+      "phase": 2,
+      "summary": "Unlike LLM context, the project cache lives in LanceDB (_cache.lance) with answer, sources, hit_count, timestamp — survives restarts, cleared only explicitly.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-060",
+      "name": "GPU (Graphics Processing Unit)",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration"
+      ],
+      "phase": 1,
+      "summary": "Chip for parallel matrix ops; neural nets are matrix multiplications, so GPUs are vastly faster than CPUs (project: RTX 4060 Ti, 4352 CUDA cores, 87 chunks/s embedding).",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-061",
+      "name": "VRAM (Video RAM)",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration"
+      ],
+      "phase": 1,
+      "summary": "GPU memory; models must fit entirely in VRAM for full speed or they spill to system RAM and slow down (BGE ~1.3GB + LLaVA ~5GB + qwen14b ~9GB fit in 17.2GB).",
+      "source_type": "source",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-062",
+      "name": "CUDA",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration"
+      ],
+      "phase": 1,
+      "summary": "NVIDIA's parallel computing platform; PyTorch uses it transparently — model.to('cuda') moves tensors to GPU.",
+      "source_type": "source",
+      "day_assigned": 6
+    },
+    {
+      "id": "src-063",
+      "name": "Batch Processing (GPU batching)",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration",
+        "Guide §5 Parallel & Concurrent Processing"
+      ],
+      "phase": 2,
+      "summary": "Process many items in one pass: batch_size=256 embeds 256 chunks per GPU forward pass — 87 chunks/s vs 4 on sequential CPU (21x).",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-064",
+      "name": "Multithreading vs Multiprocessing",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration",
+        "Guide §5 Parallel & Concurrent Processing"
+      ],
+      "phase": 2,
+      "summary": "Threads share memory, good for I/O (16 threads for PDF pages); processes have separate memory and bypass the GIL, good for CPU-heavy work (CPU embedding).",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-065",
+      "name": "GIL (Global Interpreter Lock)",
+      "sections": [
+        "Glossary §11 Hardware & Acceleration",
+        "Guide §5 Parallel & Concurrent Processing"
+      ],
+      "phase": 2,
+      "summary": "Python lock allowing one thread to run bytecode at a time — threads useless for CPU parallelism. Workarounds: multiprocessing, GPU, C extensions that release the GIL.",
+      "source_type": "source",
+      "update_2026": "2026 update: Python 3.13+ offers a free-threaded (no-GIL) build (PEP 703), so the GIL constraint is no longer absolute on modern Python.",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-066",
+      "name": "PDF Parsing (PyMuPDF / pypdf / pdfplumber)",
+      "sections": [
+        "Glossary §12 Text Processing"
+      ],
+      "phase": 2,
+      "summary": "PDFs store positioned characters, not flowing text, so extraction needs spatial analysis. PyMuPDF fastest (C-based), pypdf pure-Python fallback, pdfplumber for tables.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-067",
+      "name": "Table Extraction",
+      "sections": [
+        "Glossary §12 Text Processing"
+      ],
+      "phase": 2,
+      "summary": "pdfplumber finds table boundaries via horizontal/vertical line detection; tables stored as markdown (readable) + flat text (embeddable).",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-068",
+      "name": "HTML Parsing (BeautifulSoup)",
+      "sections": [
+        "Glossary §12 Text Processing"
+      ],
+      "phase": 2,
+      "summary": "Parse web pages, strip noise (scripts, nav, footers), extract clean text, and track h1→h2→h3 hierarchy to assign section names to paragraphs.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-069",
+      "name": "Noise Filtering",
+      "sections": [
+        "Glossary §12 Text Processing"
+      ],
+      "phase": 2,
+      "summary": "Drop low-quality chunks pre-embedding: <30 words, citation-heavy (>5 [N] markers), wiki navigation patterns, DOI/ISBN strings (54 raw → 30 clean chunks).",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-070",
+      "name": "Mermaid Diagrams",
+      "sections": [
+        "Glossary §12 Text Processing"
+      ],
+      "phase": 2,
+      "summary": "Text-based diagram language rendering in browsers ('graph TD; A-->B' → flowchart); supports flowchart, sequence, ER, class, timeline.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-071",
+      "name": "Inverted Index",
+      "sections": [
+        "Glossary §13 Search & Indexing"
+      ],
+      "phase": 2,
+      "summary": "Word → list-of-documents map enabling fast keyword search; the structure behind FTS in LanceDB.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-072",
+      "name": "TF-IDF",
+      "sections": [
+        "Glossary §13 Search & Indexing"
+      ],
+      "phase": 2,
+      "summary": "Term Frequency (often in this doc = relevant) × Inverse Document Frequency (rare across docs = discriminating). BM25 is its improved successor.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-073",
+      "name": "FTS Index (built at ingest)",
+      "sections": [
+        "Glossary §13 Search & Indexing",
+        "Guide §10 Optimisation Techniques"
+      ],
+      "phase": 2,
+      "summary": "Keyword index created once after each ingestion (create_fts_index) — not per query (that cost 500ms/query before the fix) — enabling instant hybrid search.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-074",
+      "name": "Query Expansion (recall vs precision)",
+      "sections": [
+        "Glossary §13 Search & Indexing",
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 2,
+      "summary": "Generate query variants (original / key terms / domain-boosted) to raise recall — the fraction of relevant docs actually retrieved — at slight precision cost.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-075",
+      "name": "FastAPI",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks",
+        "Guide §2 API Design"
+      ],
+      "phase": 2,
+      "summary": "Python REST framework with auto OpenAPI docs; the RAG API server on port 8000 (@app.post('/query') → smart_retrieve).",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-076",
+      "name": "Gradio",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks"
+      ],
+      "phase": 2,
+      "summary": "Python library turning functions into browser UIs (Textbox, Chatbot, Dataframe); the app's UI on port 7860.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-077",
+      "name": "RecursiveCharacterTextSplitter (LangChain)",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks",
+        "Glossary §4 RAG"
+      ],
+      "phase": 2,
+      "summary": "Splitter trying paragraph breaks, then newlines, then sentences, then spaces — respects natural boundaries before falling back to characters.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-078",
+      "name": "PyArrow (columnar schema)",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks",
+        "Guide §3 Database Design"
+      ],
+      "phase": 2,
+      "summary": "Columnar data library used by LanceDB for schema definition (pa.schema/pa.field) — efficient columnar ops, type-safe storage.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-079",
+      "name": "DuckDuckGo Search library",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks"
+      ],
+      "phase": 2,
+      "summary": "Free no-API-key search: DDGS().text(query) → {title, href, body} list; powers agent web research.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-080",
+      "name": "pynvml (GPU metrics)",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks",
+        "Guide §20 Real-Time Feedback & Observability"
+      ],
+      "phase": 2,
+      "summary": "NVIDIA Management Library bindings for real-time GPU utilisation, VRAM, temperature, power — sampled every second in a background thread.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-081",
+      "name": "psutil (system metrics)",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks"
+      ],
+      "phase": 2,
+      "summary": "Cross-platform CPU %, RAM, frequency, battery metrics library (Windows/Linux/macOS).",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-082",
+      "name": "uvicorn (ASGI server)",
+      "sections": [
+        "Glossary §14 Infrastructure & Frameworks"
+      ],
+      "phase": 2,
+      "summary": "ASGI web server that runs FastAPI apps: uvicorn.run(app, host, port) handles HTTP connections and routes them to handlers.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-083",
+      "name": "Modular Architecture",
+      "sections": [
+        "Guide §1 Modular Architecture"
+      ],
+      "phase": 1,
+      "summary": "Split the system into independent modules that each do one thing (ingester/embedder/db/retriever/...) — swap LanceDB for ChromaDB by touching only db.py. Kitchen appliances, not one machine.",
+      "source_type": "source",
+      "day_assigned": 7
+    },
+    {
+      "id": "src-084",
+      "name": "Single Responsibility Principle (SOLID)",
+      "sections": [
+        "Guide §1 Modular Architecture"
+      ],
+      "phase": 1,
+      "summary": "Every module/class/function has exactly one reason to change; if a function does two things, split it. The 'S' in SOLID.",
+      "source_type": "source",
+      "day_assigned": 1
+    },
+    {
+      "id": "src-085",
+      "name": "API Design",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 1,
+      "summary": "Defining how software talks to software — the 'menu' of actions offered. Applies to REST endpoints and to plain function signatures (clear inputs, defaults, predictable returns).",
+      "source_type": "source",
+      "day_assigned": 2
+    },
+    {
+      "id": "src-086",
+      "name": "REST API",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 1,
+      "summary": "HTTP interface so any tool can use the system without knowing Python: GET / health, GET /categories, POST /query, POST /query/image.",
+      "source_type": "source",
+      "day_assigned": 3
+    },
+    {
+      "id": "src-087",
+      "name": "API Versioning",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 2,
+      "summary": "Declare a version (1.0.0) so clients know when breaking changes happen.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-088",
+      "name": "Input Validation (Pydantic)",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 2,
+      "summary": "Pydantic models reject malformed requests before they reach business logic.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-089",
+      "name": "HTTP Error Codes",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 2,
+      "summary": "Communicate failure type: 400 bad request, 404 not found, 500 server error.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-090",
+      "name": "CORS (Cross-Origin Resource Sharing)",
+      "sections": [
+        "Guide §2 API Design"
+      ],
+      "phase": 2,
+      "summary": "Browser policy controlling which origins may call an API; the project allows any origin so browser apps can use it.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-091",
+      "name": "Database Schema Design",
+      "sections": [
+        "Guide §3 Database Design"
+      ],
+      "phase": 1,
+      "summary": "Structure determines what you can query fast — a library filed by subject, not by the author's shoe size. Fields chosen for the queries you'll run (id, text, vectors, content_type, section, page...).",
+      "source_type": "source",
+      "day_assigned": 4
+    },
+    {
+      "id": "src-092",
+      "name": "Category Isolation Pattern",
+      "sections": [
+        "Guide §3 Database Design"
+      ],
+      "phase": 2,
+      "summary": "Each knowledge category gets its own isolated vector store folder — finance queries never surface engineering chunks; each domain stays pure.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-093",
+      "name": "Columnar Storage",
+      "sections": [
+        "Guide §3 Database Design",
+        "Glossary §5 Vector Databases"
+      ],
+      "phase": 2,
+      "summary": "Data stored column-by-column (Parquet-style): a vector search reads only the text_vector column, not every field of every row — much faster than row storage for analytics.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-094",
+      "name": "Caching (concept)",
+      "sections": [
+        "Guide §4 Caching Strategies"
+      ],
+      "phase": 1,
+      "summary": "Store results of expensive operations for reuse — the friend who remembers 'Luigi's on Main Street' instead of re-researching. Exact-match dict lookup vs semantic matching.",
+      "source_type": "source",
+      "day_assigned": 5
+    },
+    {
+      "id": "src-095",
+      "name": "I/O-bound vs CPU-bound Work",
+      "sections": [
+        "Guide §5 Parallel & Concurrent Processing"
+      ],
+      "phase": 2,
+      "summary": "I/O-bound (disk/network waits) suits threads — GIL releases during I/O; CPU-bound (math) needs processes or GPU. The project: 16 threads for PDF pages, processes for CPU embedding.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-096",
+      "name": "Streaming / Batched Processing (PAGE_BATCH_SIZE=50)",
+      "sections": [
+        "Guide §6 Memory Management & Streaming"
+      ],
+      "phase": 2,
+      "summary": "Process PDFs 50 pages at a time — constant ~KB-scale RAM regardless of document size, instead of loading 5,000 pages (GBs) at once. Read 10 pages, take notes, move on.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-097",
+      "name": "Generator vs List (lazy evaluation)",
+      "sections": [
+        "Guide §6 Memory Management & Streaming",
+        "Guide §19 Orchestration & Control Flow"
+      ],
+      "phase": 2,
+      "summary": "A list materialises everything in RAM; a generator yields one item at a time (yield from extract_chunks(page)) — one page in memory, and it powers streaming UIs.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-098",
+      "name": "Batch Writes",
+      "sections": [
+        "Guide §6 Memory Management & Streaming"
+      ],
+      "phase": 2,
+      "summary": "Write 500 chunks per DB call, never 5,000 at once — bounds memory and keeps writes efficient.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-099",
+      "name": "In-Process Model/Result Caching (memoization)",
+      "sections": [
+        "Guide §6 Memory Management & Streaming",
+        "Guide §8 Hardware Abstraction"
+      ],
+      "phase": 2,
+      "summary": "Load BGE once and reuse (_models dict); assess() hardware detection cached in _CACHED — 0ms instead of 200ms × N batches when it was called inside a loop.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-100",
+      "name": "Error Handling: try/except with logging",
+      "sections": [
+        "Guide §7 Error Handling & Resilience"
+      ],
+      "phase": 2,
+      "summary": "Catch, log, continue: if image extraction fails, text chunks still index. Panic-and-cancel-dinner vs use-the-microwave.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-101",
+      "name": "Graceful Fallback / Degradation",
+      "sections": [
+        "Guide §7 Error Handling & Resilience"
+      ],
+      "phase": 2,
+      "summary": "If hybrid search throws (broken FTS index), fall back to pure vector search — an answer is still returned, degraded not dead.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-102",
+      "name": "Defensive Defaults",
+      "sections": [
+        "Guide §7 Error Handling & Resilience"
+      ],
+      "phase": 2,
+      "summary": "Start with safe values (cpu, batch 32, 1 worker), then try to detect better ones; if detection fails, the system still works.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-103",
+      "name": "Never Silently Fail",
+      "sections": [
+        "Guide §7 Error Handling & Resilience"
+      ],
+      "phase": 2,
+      "summary": "except: pass swallows errors invisibly; always at least log the exception (log.warning('Cache save failed: %s', e)) so failures are discoverable.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-104",
+      "name": "Windows File Lock Handling",
+      "sections": [
+        "Guide §7 Error Handling & Resilience"
+      ],
+      "phase": 3,
+      "summary": "Windows locks DB files, so delete_category() empties the collection (delete rows) instead of deleting the folder; the folder stays but is filtered from listings.",
+      "source_type": "source",
+      "day_assigned": 17
+    },
+    {
+      "id": "src-105",
+      "name": "Hardware Abstraction / Auto-Detection",
+      "sections": [
+        "Guide §8 Hardware Abstraction"
+      ],
+      "phase": 2,
+      "summary": "assess() probes GPU (pynvml→torch→GPUtil), CPU cores, RAM, and picks device/batch/workers per machine — cuda+256 on RTX, cpu+32+3 workers on an 8GB laptop. Automatic transmission, not manual.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-106",
+      "name": "Test Suite with Keyword Assertions",
+      "sections": [
+        "Guide §9 Testing & Accuracy Measurement"
+      ],
+      "phase": 2,
+      "summary": "27 real questions, each with expected keyword + section + page, run automatically — tests factual, technical, layman, and table retrieval without human judgement.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-107",
+      "name": "Accuracy Iteration (81% → 100%)",
+      "sections": [
+        "Guide §9 Testing & Accuracy Measurement"
+      ],
+      "phase": 3,
+      "summary": "Measured journey: baseline 81% → hybrid search 93% → fixing a wrong test assertion ('5 min' not '5 minutes') 96% → factual anchor injection 100%. Even wrong tests teach data assumptions.",
+      "source_type": "source",
+      "day_assigned": 18
+    },
+    {
+      "id": "src-108",
+      "name": "Source Format Affects Retrieval",
+      "sections": [
+        "Guide §9 Testing & Accuracy Measurement"
+      ],
+      "phase": 3,
+      "summary": "Markdown cleaning strips code blocks — 'ollama serve' became unfindable. Fix: state critical facts in plain prose (Quick Reference Facts section). Your data format shapes what RAG can retrieve.",
+      "source_type": "source",
+      "day_assigned": 19
+    },
+    {
+      "id": "src-109",
+      "name": "Optimise After Correct",
+      "sections": [
+        "Guide §10 Optimisation Techniques"
+      ],
+      "phase": 2,
+      "summary": "Prove the factory makes good product first, then improve machinery — correctness first, speed second.",
+      "source_type": "source",
+      "day_assigned": 8
+    },
+    {
+      "id": "src-110",
+      "name": "Regex Precompilation",
+      "sections": [
+        "Guide §10 Optimisation Techniques"
+      ],
+      "phase": 2,
+      "summary": "Compile the pattern once at module load (_UUID_RE = re.compile(...)) and reuse, instead of recompiling on every call; same idea as splitting a string once, not twice.",
+      "source_type": "source",
+      "day_assigned": 9
+    },
+    {
+      "id": "src-111",
+      "name": "Dead Code Removal",
+      "sections": [
+        "Guide §10 Optimisation Techniques"
+      ],
+      "phase": 2,
+      "summary": "Deleted 6 never-called functions/imports/constants — dead code confuses readers and costs mental space with zero benefit.",
+      "source_type": "source",
+      "day_assigned": 10
+    },
+    {
+      "id": "src-112",
+      "name": "MAX_STEPS Limit (8 cycles)",
+      "sections": [
+        "Guide §12 The ReAct Pattern",
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 2,
+      "summary": "Cap agent loops at 8 THOUGHT/ACTION cycles; if no FINAL_ANSWER by then, force stop — prevents runaway loops and runaway costs, and limits hijack damage.",
+      "source_type": "source",
+      "day_assigned": 11
+    },
+    {
+      "id": "src-113",
+      "name": "Skill Design Principles",
+      "sections": [
+        "Guide §13 Tool Use & Skill Design"
+      ],
+      "phase": 3,
+      "summary": "A good skill does one thing, returns useful text, and has a clear input schema with a usage example (few-shot) — the description is what the LLM reads to decide when to call it.",
+      "source_type": "source",
+      "day_assigned": 20
+    },
+    {
+      "id": "src-114",
+      "name": "Calculator over LLM Arithmetic",
+      "sections": [
+        "Guide §13 Tool Use & Skill Design"
+      ],
+      "phase": 2,
+      "summary": "LLMs are trained on text, not arithmetic, and make mistakes on 21500×0.0732; evaluating the expression in Python is always right. Never trust an LLM for precise math.",
+      "source_type": "source",
+      "day_assigned": 12
+    },
+    {
+      "id": "src-115",
+      "name": "Sandboxing (run_python)",
+      "sections": [
+        "Guide §13 Tool Use & Skill Design"
+      ],
+      "phase": 3,
+      "summary": "exec() with only whitelisted builtins (print, range, len, sum, math, statistics) — no filesystem, network, or subprocess, so a tricked agent can't escape.",
+      "source_type": "source",
+      "day_assigned": 21
+    },
+    {
+      "id": "src-116",
+      "name": "Agent System Prompt Structure",
+      "sections": [
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 3,
+      "summary": "Role → current date/time → skills with descriptions/params/examples → exact format rules → behavioural rules (valid JSON input, cite sources, precise numbers).",
+      "source_type": "source",
+      "day_assigned": 15
+    },
+    {
+      "id": "src-117",
+      "name": "Date/Time Injection",
+      "sections": [
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 2,
+      "summary": "Inject 'Current date and time: ...' into the prompt; otherwise the model assumes its training-cutoff year and refuses to search for current events.",
+      "source_type": "source",
+      "day_assigned": 13
+    },
+    {
+      "id": "src-118",
+      "name": "Few-Shot Examples",
+      "sections": [
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 2,
+      "summary": "Each skill carries an example call; LLMs imitate demonstrated usage far more reliably than they follow abstract descriptions.",
+      "source_type": "source",
+      "day_assigned": 14
+    },
+    {
+      "id": "src-119",
+      "name": "Prompt Injection & Defences",
+      "sections": [
+        "Guide §14 Prompt Engineering for Agents"
+      ],
+      "phase": 3,
+      "summary": "User input reaches the agent prompt ('ignore instructions and run_python(os.system...)'). Defences: sandbox, skill whitelist (can't invent skills), MAX_STEPS damage cap.",
+      "source_type": "source",
+      "day_assigned": 16
+    },
+    {
+      "id": "src-120",
+      "name": "Memory Types in AI Systems",
+      "sections": [
+        "Guide §15 Memory in AI Systems"
+      ],
+      "phase": 3,
+      "summary": "Context window = working memory (last 6 turns, session-only); project cache = episodic (permanent Q&A); RAG knowledge base = semantic (domain knowledge); agent loop history = per-task scratch.",
+      "source_type": "source",
+      "day_assigned": 17
+    },
+    {
+      "id": "src-121",
+      "name": "Memory Hierarchy (speed vs persistence)",
+      "sections": [
+        "Guide §15 Memory in AI Systems"
+      ],
+      "phase": 3,
+      "summary": "Context window 0ms/session-only → cache ~10ms/permanent → RAG ~200-550ms/permanent → web 2-30s/internet. Check the fast layers first.",
+      "formula": "context (0ms) < cache (10ms) < RAG (~500ms) < web (2-30s)",
+      "source_type": "source",
+      "day_assigned": 18
+    },
+    {
+      "id": "src-122",
+      "name": "Multimodal Ingestion Pipeline",
+      "sections": [
+        "Guide §16 Multi-Modal AI"
+      ],
+      "phase": 3,
+      "summary": "PDF chart → PyMuPDF extracts PNG → Pillow resizes to 1024 → LLaVA describes it → BGE embeds the description + CLIP embeds the image → LanceDB stores all four fields.",
+      "source_type": "source",
+      "day_assigned": 19
+    },
+    {
+      "id": "src-123",
+      "name": "RAG as Agentic Retrieval (decision tree)",
+      "sections": [
+        "Guide §17 RAG as Agentic Retrieval"
+      ],
+      "phase": 3,
+      "summary": "Retrieval is a skill the agent chooses: memory cache first (instant), then project RAG (~500ms), then web (2-30s) — a researcher checks memory, then notes, then the internet.",
+      "source_type": "source",
+      "day_assigned": 20
+    },
+    {
+      "id": "src-124",
+      "name": "Virtuous Cycle (web → ingest → RAG)",
+      "sections": [
+        "Guide §17 RAG as Agentic Retrieval"
+      ],
+      "phase": 3,
+      "summary": "Web results are ingested into the project RAG, so next time the answer is local and fast — the knowledge base grows richer with every research session.",
+      "source_type": "source",
+      "day_assigned": 21
+    },
+    {
+      "id": "src-125",
+      "name": "Multi-Category Search",
+      "sections": [
+        "Guide §17 RAG as Agentic Retrieval"
+      ],
+      "phase": 3,
+      "summary": "One answer can search both the user's selected category and the project's own accumulated knowledge — curated library + research notes combined.",
+      "source_type": "source",
+      "day_assigned": 15
+    },
+    {
+      "id": "src-126",
+      "name": "7-Layer Retrieval Quality Stack",
+      "sections": [
+        "Guide §18 Retrieval Quality Engineering"
+      ],
+      "phase": 3,
+      "summary": "Embedding quality → chunking → metadata richness → query expansion → hybrid search → MMR diversity → cross-encoder re-rank (+ factual anchors) — each layer compounds accuracy.",
+      "source_type": "source",
+      "day_assigned": 16
+    },
+    {
+      "id": "src-127",
+      "name": "Orchestration & Control Flow",
+      "sections": [
+        "Guide §19 Orchestration & Control Flow"
+      ],
+      "phase": 3,
+      "summary": "Layered coordination like a film director: UI event handlers → smart retriever pipeline → agent ReAct loop → chat dispatch routing (agent mode vs RAG chat).",
+      "source_type": "source",
+      "day_assigned": 17
+    },
+    {
+      "id": "src-128",
+      "name": "Generator Pattern for Streaming UI",
+      "sections": [
+        "Guide §19 Orchestration & Control Flow"
+      ],
+      "phase": 3,
+      "summary": "Python generators yield UI updates token-by-token (yield history, '', gr.update()) so users watch the answer being written without blocking.",
+      "source_type": "source",
+      "day_assigned": 18
+    },
+    {
+      "id": "src-129",
+      "name": "Background Threads for Non-Blocking Ops",
+      "sections": [
+        "Guide §19 Orchestration & Control Flow"
+      ],
+      "phase": 3,
+      "summary": "Cache saves run in daemon threads — the user sees the answer immediately; if the save fails it's logged, never user-impacting.",
+      "source_type": "source",
+      "day_assigned": 19
+    },
+    {
+      "id": "src-130",
+      "name": "Observability",
+      "sections": [
+        "Guide §20 Real-Time Feedback & Observability"
+      ],
+      "phase": 3,
+      "summary": "Can you see inside the system? Car-dashboard principle: hardware monitor, processing metrics (rate, ETA, phase), and live agent reasoning, all streamed in real time.",
+      "source_type": "source",
+      "day_assigned": 20
+    },
+    {
+      "id": "src-131",
+      "name": "Live Hardware Monitoring",
+      "sections": [
+        "Guide §20 Real-Time Feedback & Observability"
+      ],
+      "phase": 3,
+      "summary": "Background thread samples CPU/RAM/GPU/power every second into a shared dict; a UI timer reads it every 2s and renders utilisation bars.",
+      "source_type": "source",
+      "day_assigned": 21
+    },
+    {
+      "id": "src-132",
+      "name": "Agent Transparency (streamed reasoning)",
+      "sections": [
+        "Guide §20 Real-Time Feedback & Observability"
+      ],
+      "phase": 3,
+      "summary": "Every THOUGHT/ACTION/OBSERVATION streams live to the UI, so the user sees exactly what the agent is doing and why at each step.",
+      "source_type": "source",
+      "day_assigned": 15
+    },
+    {
+      "id": "src-133",
+      "name": "Structured Logging (levels)",
+      "sections": [
+        "Guide §20 Real-Time Feedback & Observability"
+      ],
+      "phase": 3,
+      "summary": "logging module over print(): timestamps, DEBUG/INFO/WARNING/ERROR levels, filtering, redirection to files/monitoring — consistent across modules.",
+      "source_type": "source",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-001",
+      "name": "GraphRAG",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-021"
+      ],
+      "summary": "Microsoft's graph-based RAG: LLM extracts an entity knowledge graph + community detection, enabling multi-hop retrieval and global 'summarise the whole corpus' questions flat chunk retrieval can't answer.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    },
+    {
+      "id": "enh-002",
+      "name": "Agentic RAG",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-021",
+        "src-123"
+      ],
+      "summary": "A reasoning loop around retrieval: instead of one retrieve-then-generate pass, the agent asks 'do I have enough? is it relevant? should I reformulate and search again?' — the 2026 default for hard queries.",
+      "source_type": "enhancement",
+      "day_assigned": 18
+    },
+    {
+      "id": "enh-003",
+      "name": "Contextual Retrieval",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-023",
+        "src-025"
+      ],
+      "summary": "Anthropic technique: prepend an LLM-generated situating sentence ('This chunk is from the SLA section of...') to every chunk before embedding — cuts failed retrievals sharply by giving chunks document-level context.",
+      "source_type": "enhancement",
+      "day_assigned": 19
+    },
+    {
+      "id": "enh-004",
+      "name": "Semantic Chunking",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-023"
+      ],
+      "summary": "Split where embedding similarity between adjacent sentences drops (topic shift) instead of at fixed word counts — chunks follow meaning boundaries. Costlier; adopt only when retrieval metrics justify it.",
+      "source_type": "enhancement",
+      "day_assigned": 20
+    },
+    {
+      "id": "enh-005",
+      "name": "Late Chunking",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-023",
+        "src-024"
+      ],
+      "summary": "Embed the whole document with a long-context embedding model FIRST, then split the token embeddings into chunks — each chunk's vector carries long-range context that independently-embedded chunks miss.",
+      "source_type": "enhancement",
+      "day_assigned": 21
+    },
+    {
+      "id": "enh-006",
+      "name": "HyDE (Hypothetical Document Embeddings)",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-074"
+      ],
+      "summary": "Ask the LLM to write a hypothetical answer to the query, embed THAT, and search with it — answer-shaped text lands closer to real answer passages than question-shaped text does.",
+      "source_type": "enhancement",
+      "day_assigned": 15
+    },
+    {
+      "id": "enh-007",
+      "name": "ColBERT / Late Interaction",
+      "sections": [
+        "Enhancement — Re-ranking"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-041",
+        "src-042"
+      ],
+      "summary": "Middle ground between bi- and cross-encoders: store per-token vectors, compare token-by-token (MaxSim) at query time. Near cross-encoder quality at medium speed; ColBERTv2 is canonical, jina-reranker-v3 ('last but not late') is the 2026 twist.",
+      "source_type": "enhancement",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-008",
+      "name": "Learned Sparse Retrieval (SPLADE)",
+      "sections": [
+        "Enhancement — Retrieval"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-034",
+        "src-043"
+      ],
+      "summary": "Neural model outputs weighted keyword expansions (sparse vectors) — BM25's exact-match strengths plus learned synonyms, servable from a standard inverted index. pgvector 0.9 added sparse vector support.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    },
+    {
+      "id": "enh-009",
+      "name": "Matryoshka Embeddings (MRL)",
+      "sections": [
+        "Enhancement — Embeddings"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-015",
+        "src-016"
+      ],
+      "summary": "Train embeddings so the first N dims form a valid smaller embedding: truncate 1024→256 dims and lose only ~1-3% recall. Supported by most 2026 models (OpenAI text-3, Gemini Embedding 2, Nomic, Jina v5).",
+      "source_type": "enhancement",
+      "day_assigned": 18
+    },
+    {
+      "id": "enh-010",
+      "name": "Embedding Quantization (int8 / binary)",
+      "sections": [
+        "Enhancement — Embeddings"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-012",
+        "src-015"
+      ],
+      "summary": "Store vectors as int8 or 1-bit instead of float32: 4-32x less memory at ~1-5% recall cost. Same trade-off idea as LLM weight quantization, applied to the vector store.",
+      "source_type": "enhancement",
+      "day_assigned": 19
+    },
+    {
+      "id": "enh-011",
+      "name": "MTEB Benchmark",
+      "sections": [
+        "Enhancement — Embeddings"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-016"
+      ],
+      "summary": "Massive Text Embedding Benchmark — the standard leaderboard for choosing embedding models. 2026 retrieval leaders include NV-Embed-v2, Gemini Embedding, BGE-M3, Voyage, and mxbai-embed-large.",
+      "source_type": "enhancement",
+      "day_assigned": 20
+    },
+    {
+      "id": "enh-012",
+      "name": "BGE-M3 and Modern Embedding Models",
+      "sections": [
+        "Enhancement — Embeddings"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-016"
+      ],
+      "summary": "BGE-large's successor: one model emitting dense, sparse, AND multi-vector (ColBERT-style) representations, multilingual, 8K-token inputs — hybrid search from a single model instead of separate systems.",
+      "source_type": "enhancement",
+      "day_assigned": 21
+    },
+    {
+      "id": "enh-013",
+      "name": "KV Cache",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-007",
+        "src-008"
+      ],
+      "summary": "During generation, each token's attention Keys/Values are cached so they aren't recomputed for every new token — the reason long chats consume GPU memory, and the main target of 2026 serving optimisations.",
+      "source_type": "enhancement",
+      "day_assigned": 15
+    },
+    {
+      "id": "enh-014",
+      "name": "PagedAttention / vLLM",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-014"
+      ],
+      "summary": "vLLM manages KV cache like OS virtual memory — fixed-size pages mapped by a page table — cutting the traditional 60-80% KV memory waste to near zero and serving 2-3x more concurrent requests per GPU.",
+      "source_type": "enhancement",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-015",
+      "name": "FlashAttention",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-007"
+      ],
+      "summary": "IO-aware exact attention kernel that tiles computation to avoid writing the big attention matrix to slow GPU memory — big speed/memory wins; successor kernels (FlashInfer) add block-sparse KV and JIT compilation.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    },
+    {
+      "id": "enh-016",
+      "name": "Speculative Decoding",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-003"
+      ],
+      "summary": "A small draft model proposes several tokens; the big model verifies them in one parallel pass — accepted tokens come out several-at-a-time, speeding generation without changing output quality.",
+      "source_type": "enhancement",
+      "day_assigned": 18
+    },
+    {
+      "id": "enh-017",
+      "name": "Continuous Batching",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-063"
+      ],
+      "summary": "Server-side batching where finished sequences are evicted and new requests inserted mid-flight — no head-of-line blocking, unlike static batches that wait for the slowest request.",
+      "source_type": "enhancement",
+      "day_assigned": 19
+    },
+    {
+      "id": "enh-018",
+      "name": "Mixture of Experts (MoE)",
+      "sections": [
+        "Enhancement — LLM Architecture"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-004",
+        "src-006"
+      ],
+      "summary": "Architecture where a router activates only a few 'expert' sub-networks per token — a model can have huge total parameters but small active compute per token (e.g., Mixtral, DeepSeek family).",
+      "source_type": "enhancement",
+      "day_assigned": 20
+    },
+    {
+      "id": "enh-019",
+      "name": "Native Function / Tool Calling",
+      "sections": [
+        "Enhancement — Agents"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-051",
+        "src-054"
+      ],
+      "summary": "Model APIs now accept JSON-schema tool definitions and return structured tool calls directly — replacing regex-parsed text formats like classic ReAct THOUGHT/ACTION blocks in production agents.",
+      "source_type": "enhancement",
+      "day_assigned": 21
+    },
+    {
+      "id": "enh-020",
+      "name": "Constrained Decoding / Structured Outputs",
+      "sections": [
+        "Enhancement — Agents"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-054"
+      ],
+      "summary": "Masking invalid tokens during sampling so output is GUARANTEED to match a JSON schema/grammar — stronger than low temperature + format instructions, which only make compliance likely.",
+      "source_type": "enhancement",
+      "day_assigned": 15
+    },
+    {
+      "id": "enh-021",
+      "name": "MCP (Model Context Protocol)",
+      "sections": [
+        "Enhancement — Agents"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-052",
+        "src-113"
+      ],
+      "summary": "Open standard (Anthropic, Nov 2024; donated to Linux Foundation's Agentic AI Foundation Dec 2025) that standardises how agents discover and call tools/data sources. Near-universal by 2026: 10,000+ public servers, all major vendors. Wraps function calling, doesn't replace it.",
+      "source_type": "enhancement",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-022",
+      "name": "Agent Orchestration Frameworks (LangGraph, CrewAI, AutoGen)",
+      "sections": [
+        "Enhancement — Agents"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-127"
+      ],
+      "summary": "2026 landscape: LangGraph dominates production (graph state machine, checkpointing, human-in-the-loop); CrewAI fastest prototyping; AutoGen/AG2 research multi-agent debate; first-party SDKs when you don't need heavy orchestration.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    },
+    {
+      "id": "enh-023",
+      "name": "Multi-Agent Systems / A2A",
+      "sections": [
+        "Enhancement — Agents"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-050",
+        "src-127"
+      ],
+      "summary": "Multiple specialised agents coordinating (planner/researcher/coder), with agent-to-agent (A2A) protocols maturing alongside MCP in 2026. Powerful but adds failure modes — single agents still preferred when sufficient.",
+      "source_type": "enhancement",
+      "day_assigned": 18
+    },
+    {
+      "id": "enh-024",
+      "name": "LoRA / QLoRA",
+      "sections": [
+        "Enhancement — Training"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-022",
+        "src-012"
+      ],
+      "summary": "Parameter-efficient fine-tuning: train small low-rank adapter matrices instead of all weights (10-20x cheaper, 90-95% of full quality); QLoRA does it on a 4-bit-quantized base for single-GPU training.",
+      "source_type": "enhancement",
+      "day_assigned": 19
+    },
+    {
+      "id": "enh-025",
+      "name": "DPO and Preference Optimization",
+      "sections": [
+        "Enhancement — Training"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-013"
+      ],
+      "summary": "Direct Preference Optimization and cousins (IPO, KTO, ORPO, GRPO) replaced the RLHF SFT-then-PPO pipeline as the 2026 default for preference alignment — simpler to run, competitive quality, ~1-5K ranked pairs.",
+      "source_type": "enhancement",
+      "day_assigned": 20
+    },
+    {
+      "id": "enh-026",
+      "name": "RAG Evaluation (RAGAS)",
+      "sections": [
+        "Enhancement — Evaluation"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-106",
+        "src-107"
+      ],
+      "summary": "Automated RAG metrics along two axes: retrieval (context relevance/precision/recall) and generation (faithfulness, answer correctness) — RAGAS and DeepEval are the standard frameworks; extends the project's keyword-assertion tests.",
+      "source_type": "enhancement",
+      "day_assigned": 21
+    },
+    {
+      "id": "enh-027",
+      "name": "LLM-as-Judge",
+      "sections": [
+        "Enhancement — Evaluation"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-106"
+      ],
+      "summary": "Use a strong LLM to grade another model's answers against criteria/references — standard 2026 eval practice, competitive with specialised detectors, though judge consistency and bias need care (few-shot human anchors help).",
+      "source_type": "enhancement",
+      "day_assigned": 15
+    },
+    {
+      "id": "enh-028",
+      "name": "Hallucination / Groundedness Detection & Guardrails",
+      "sections": [
+        "Enhancement — Evaluation"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-058"
+      ],
+      "summary": "Runtime checks that an answer is supported by retrieved context (groundedness/faithfulness), plus abstention policies ('say I don't know when unsupported') and input/output guardrail filters.",
+      "source_type": "enhancement",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-029",
+      "name": "Modern Reranker Landscape",
+      "sections": [
+        "Enhancement — Re-ranking"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-042"
+      ],
+      "summary": "2026 upgrades over ms-marco-MiniLM: BGE-Reranker-v2-m3 (open, self-host), Cohere Rerank 4 (API), jina-reranker-v3. Cross-encoder rerankers typically add +5-15 NDCG@10 over vector-only retrieval.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    },
+    {
+      "id": "enh-030",
+      "name": "pgvector",
+      "sections": [
+        "Enhancement — Vector Databases"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-026",
+        "src-027"
+      ],
+      "summary": "Postgres extension for vector search — 2026's default for most teams: up to ~50M vectors inside the database you already run, no separate system. v0.9 (2026) added sparse vectors and big speed-ups.",
+      "source_type": "enhancement",
+      "day_assigned": 18
+    },
+    {
+      "id": "enh-031",
+      "name": "Qdrant and Milvus",
+      "sections": [
+        "Enhancement — Vector Databases"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-026",
+        "src-027"
+      ],
+      "summary": "Dedicated vector DBs: Qdrant (single binary, fast filtered queries via payload index) for most production RAG; Milvus for billion-scale, Kubernetes-native deployments. LanceDB's niche = edge/desktop/embedded.",
+      "source_type": "enhancement",
+      "day_assigned": 19
+    },
+    {
+      "id": "enh-032",
+      "name": "IVF and Product Quantization (PQ)",
+      "sections": [
+        "Enhancement — Vector Databases"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-029",
+        "src-030"
+      ],
+      "summary": "ANN alternatives to HNSW: IVF clusters vectors and searches only nearby cells; PQ compresses vectors into small codes. IVF-PQ trades a little recall for far less memory at large scale.",
+      "source_type": "enhancement",
+      "day_assigned": 20
+    },
+    {
+      "id": "enh-033",
+      "name": "Reasoning Models / Test-Time Compute",
+      "sections": [
+        "Enhancement — LLM Architecture"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-055"
+      ],
+      "summary": "Models trained to emit long private 'thinking tokens' before answering (o3/o4-mini, Claude extended thinking, Gemini Deep Think, DeepSeek R1) — trained-in chain of thought; much stronger on math/code/planning, slower and pricier.",
+      "source_type": "enhancement",
+      "day_assigned": 21
+    },
+    {
+      "id": "enh-034",
+      "name": "Long Context vs RAG",
+      "sections": [
+        "Enhancement — RAG"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-008",
+        "src-021"
+      ],
+      "summary": "With 128K-1M+ windows, stuffing docs into context beats RAG for multi-step reasoning over bounded material; RAG still wins for freshness, corpus scale, cost, and citations. 2026 practice: hybrid — retrieve broadly, then reason long-context over it.",
+      "source_type": "enhancement",
+      "day_assigned": 15
+    },
+    {
+      "id": "enh-035",
+      "name": "Prompt Caching",
+      "sections": [
+        "Enhancement — Inference"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-056",
+        "src-116"
+      ],
+      "summary": "Provider-side caching of repeated prompt prefixes (system prompt, tool definitions, documents) so they're not reprocessed each call — large cost/latency savings; complements semantic answer caching.",
+      "source_type": "enhancement",
+      "day_assigned": 16
+    },
+    {
+      "id": "enh-036",
+      "name": "Free-Threaded Python (GIL Removal)",
+      "sections": [
+        "Enhancement — Hardware & Parallelism"
+      ],
+      "phase": 3,
+      "related_to": [
+        "src-065",
+        "src-064"
+      ],
+      "summary": "PEP 703: Python 3.13+ ships an optional free-threaded build with no GIL, making threads genuinely parallel for CPU work — gradually weakening the classic 'threads for I/O, processes for CPU' rule.",
+      "source_type": "enhancement",
+      "day_assigned": 17
+    }
+  ]
+}

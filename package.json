@@ -1,0 +1,23 @@
+{
+  "name": "ai-learning-quiz-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build_data.mjs && vite build",
+    "preview": "vite preview",
+    "data": "node scripts/build_data.mjs",
+    "validate": "node scripts/validate.mjs",
+    "icons": "node scripts/gen_icons.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

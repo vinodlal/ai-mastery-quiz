@@ -1,0 +1,112 @@
+# AI Mastery — 21-Day Quiz Coach (offline-first PWA)
+
+A personal, single-user quiz & spaced-repetition app generated from your two learning
+documents (`AI_TECHNICAL_GLOSSARY.md` + `SW_Engineering_and_Agentic_AI_Guide.md`).
+
+- **169 concepts** (133 from your source + 36 web-researched 2026 enhancements)
+- **169 MCQs**, every concept covered, each with a full why-right/why-wrong explanation
+- **21-day curriculum**: days 1–7 foundational, 8–14 applied, 15–21 expert + all enhancement topics
+- **Simplified SM-2 spaced repetition**: wrong → re-queued the same day; correct → 1 day → 3 days → growing interval. Mastery = 3 consecutive correct answers on 3 different days.
+- **30-minute final assessment**: 3 levels × 10 min, pass gates 90% / 85% / 80%
+- **All data in IndexedDB** on the device. No backend, no login, no analytics, zero runtime network calls.
+- **Export / Import progress as JSON** (Settings) — your backup against iOS Safari's ~7-day storage eviction.
+
+Deliverables at the project root: `concept_inventory.json`, `question_bank.json`.
+
+---
+
+## 1. Run locally on Windows
+
+```powershell
+cd "C:\My Learning APP- Claude"
+npm install        # first time only
+npm run dev        # dev server at http://localhost:5173
+```
+
+Production build + data validation:
+
+```powershell
+npm run build      # regenerates data, builds dist/ with service worker
+npm run validate   # 16-check self-test suite (data, SM-2, assessment, PWA)
+npm run preview    # serves the built app at http://localhost:4173
+```
+
+> Rule of thumb: use `npm run dev` while poking around, but test PWA/offline behaviour
+> with `npm run build` + `npm run preview` — the service worker only exists in the built app.
+
+## 2. Preview at iPhone size in Chrome DevTools
+
+1. Open http://localhost:5173 in Chrome.
+2. Press **F12** → click the **device toolbar** icon (Ctrl+Shift+M).
+3. In the dimensions dropdown choose **Edit…** → **Add custom device**:
+   - Name: `iPhone 17 Pro Max`, Width `430`, Height `932`, DPR `3`, type Mobile.
+4. Select it. Use the rotate icon to test landscape (932×430).
+5. Add a second custom device `Tablet` at `820 × 1180` for the tablet view.
+
+## 3. Install on your actual iPhone 17 Pro Max & tablet
+
+iOS requires a **secure context (HTTPS)** for the service worker, so plain
+`http://<pc-ip>:4173` over Wi-Fi will install but won't work offline. Two good options:
+
+### Option A — free static host (simplest, recommended)
+
+The app is pure static files; hosting it publicly does NOT expose your data —
+all progress lives only in your device's IndexedDB.
+
+1. `npm run build`
+2. Create a free account at https://app.netlify.com (or Cloudflare Pages / GitHub Pages).
+3. Netlify → **Add new site → Deploy manually** → drag the `dist` folder in.
+4. You get an HTTPS URL like `https://something.netlify.app`.
+5. **iPhone (Safari)**: open the URL → Share button → **Add to Home Screen** → Add.
+6. **iPad (Safari)**: same. **Android tablet (Chrome)**: open URL → ⋮ menu → **Add to Home screen** / "Install app".
+7. Open the icon once while online (precaches everything), then it works fully offline —
+   test with Airplane Mode.
+
+To update the app later: `npm run build`, drag `dist` in again.
+
+### Option B — fully local over your Wi-Fi (no internet hosting)
+
+Uses mkcert to create a certificate your iPhone can trust:
+
+```powershell
+winget install FiloSottile.mkcert
+mkcert -install
+ipconfig                       # note your PC's Wi-Fi IPv4, e.g. 192.168.1.42
+cd "C:\My Learning APP- Claude"
+mkcert 192.168.1.42            # writes 192.168.1.42.pem + 192.168.1.42-key.pem
+npm run build
+npx http-server dist -S -C 192.168.1.42.pem -K 192.168.1.42-key.pem -p 8443
+```
+
+On the iPhone (once):
+1. Find mkcert's root CA: `mkcert -CAROOT` → copy `rootCA.pem` somewhere servable,
+   e.g. `copy "$(mkcert -CAROOT)\rootCA.pem" dist\` and download it in Safari from
+   `https://192.168.1.42:8443/rootCA.pem` (or email it to yourself).
+2. Settings → **Profile Downloaded** → Install.
+3. Settings → General → About → **Certificate Trust Settings** → enable full trust for mkcert.
+4. Safari → `https://192.168.1.42:8443` → Share → **Add to Home Screen**.
+
+PC and iPhone must be on the same Wi-Fi. After the first load the app runs offline;
+the server only needs to be running again when you want to update the app.
+
+---
+
+## Project layout
+
+```
+concept_inventory.json   ← deliverable: all 169 concepts, tagged by source section
+question_bank.json       ← deliverable: all 169 MCQs with day/difficulty
+data/src/                ← hand-authored inventories + question parts (edit here)
+scripts/build_data.mjs   ← merges/validates data, assigns days, shuffles options
+scripts/validate.mjs     ← 16-check self-test suite
+scripts/gen_icons.mjs    ← regenerates PWA icons
+src/lib/scheduler.js     ← SM-2 + mastery + assessment logic (pure, unit-tested)
+src/lib/db.js            ← IndexedDB wrapper + export/import
+src/screens/             ← Dashboard, DailyQuiz, ReviewQueue, Progress, FinalTest, Settings
+```
+
+## Weekly habit
+
+Open **Settings → Export progress (JSON)** about once a week and whenever you'll
+be away from the app for a few days — iOS Safari may evict site storage after
+~7 days of non-use. Import the file to restore everything.
