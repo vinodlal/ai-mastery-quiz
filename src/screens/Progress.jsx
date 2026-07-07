@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { CONCEPTS } from "../lib/store.js";
+import { CONCEPTS, PARTS } from "../lib/store.js";
 import { masteryPercent, proficiencyPercent } from "../lib/scheduler.js";
 
 export default function Progress({ app }) {
-  const { states, derived } = app;
+  const { states, derived, settings } = app;
+  const unlocked = app.meta.unlockedUpToPart;
   const [filter, setFilter] = useState("all"); // all | weak | mastered | enhancement
   const [expanded, setExpanded] = useState(null);
 
@@ -41,9 +42,30 @@ export default function Progress({ app }) {
 
   return (
     <div className="screen">
-      <header className="apphead"><h1>Progress</h1><span className="subtitle">per-concept mastery</span></header>
+      <header className="apphead"><h1>Progress</h1><span className="subtitle">gate + true mastery</span></header>
+
+      {/* Course gate (pass/fail unlocking) — separate from SM-2 true mastery below */}
+      <div className="card">
+        <h3>Course gate</h3>
+        <div className="phasebar">
+          <div className="phasebar-label"><span>Parts passed at {settings.passThreshold}%+</span><span>{unlocked - 1}/{PARTS.length}</span></div>
+          <div className="bar"><div className="bar-fill" style={{ width: `${((unlocked - 1) / PARTS.length) * 100}%` }} /></div>
+        </div>
+        {Object.keys(app.meta.partScores || {}).length > 0 && (
+          <ul className="concept-list">
+            {PARTS.filter((p) => app.meta.partScores[p.part] != null).slice(-6).map((p) => (
+              <li key={p.part}>
+                <span className="cname">Part {p.part}: {p.title}</span>
+                <span className="csec">{p.part < unlocked ? "✅ passed" : "❌ last attempt"} · {app.meta.partScores[p.part]}%</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="csec">The gate controls unlocking only. True mastery below comes from spaced repetition: 3 correct answers on 3 different days per topic.</p>
+      </div>
 
       <div className="card">
+        <h3>True mastery (spaced repetition)</h3>
         <div className="statrow">
           <div className="stat"><b>{derived.masteredCount}</b><span>mastered</span></div>
           <div className="stat"><b>{derived.introducedCount}/{derived.totalConcepts}</b><span>seen</span></div>

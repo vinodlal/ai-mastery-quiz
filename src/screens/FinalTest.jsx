@@ -100,12 +100,13 @@ export default function FinalTest({ app }) {
             </tbody>
           </table>
           <p className="csec">
-            {ASSESSMENT.levels.map((l) => l.questions).join(" + ")} questions — each level mixes topic questions with 🧩 cross-concept scenarios.
+            {ASSESSMENT.levels.map((l) => l.questions).join(" + ")} questions. Levels 1-2 mix in a couple of 🧩 scenarios;
+            Level 3 (expert/integration) draws primarily from the cross-part scenario bank.
             Each level must be passed to unlock the next. The timer keeps running while you read explanations.
             Unanswered questions count as wrong when time runs out.
           </p>
           {!app.derived.courseComplete && (
-            <p className="update-note">You're on lesson {app.derived.currentDay} of 21 — you can take the test now, but it's designed for after the course.</p>
+            <p className="update-note">You're on part {app.derived.currentPart} of {app.derived.totalParts} — you can take the test now, but it's designed for after the course.</p>
           )}
           <button className="btn btn-primary" onClick={() => { setLevelResults([]); startLevel(0); }}>Start Level 1</button>
         </div>
