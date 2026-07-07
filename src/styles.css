@@ -217,6 +217,15 @@ body {
 .syl-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .syl-locked { opacity: 0.5; }
 .syl-current .cname { color: #a5b4fc; }
+.study-progress { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; padding: 2px 0; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border); }
+.dot-done { background: var(--accent); border-color: var(--accent); }
+.dot-now { background: var(--text); border-color: var(--text); }
+
+/* ---- settings ---- */
+.stepper { display: flex; align-items: center; gap: 14px; }
+.stepper .btn { flex: none; width: 56px; font-size: 22px; }
+.stepper-val { font-size: 24px; font-weight: 800; min-width: 72px; text-align: center; }
 
 /* ---- tablet / landscape ---- */
 @media (min-width: 700px) {

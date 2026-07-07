@@ -90,9 +90,46 @@ export function nextNewConcepts(concepts, states, n) {
   return ordered.filter((c) => !states[c.id] || !states[c.id].introduced).slice(0, n);
 }
 
-// Course day = number of days on which the daily goal was completed, +1 (cap 21).
-export function courseDay(completedDays) {
-  return Math.min(21, (completedDays || 0) + 1);
+// ---- Part gating (self-paced, score-gated — NO calendar locking) ----
+export const DEFAULT_PASS_THRESHOLD = 80; // % required on a part's Day Quiz
+export const SCENARIO_WEAVE_MIN_PARTS = 3; // scenarios join practice after unlocking 3+ parts
+
+// Pure reducer: apply a Day Quiz result to meta. Part N+1 unlocks only when
+// Part N (the current frontier) scores >= threshold. Below threshold the user
+// stays on Part N. Retaking an already-passed part never re-locks anything.
+export function applyLessonResult(meta, part, correct, total, threshold = DEFAULT_PASS_THRESHOLD, totalParts = Infinity) {
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const passed = pct >= threshold;
+  const unlocked = meta.unlockedUpToPart || 1;
+  const next = {
+    ...meta,
+    partScores: { ...(meta.partScores || {}), [part]: pct },
+  };
+  if (passed && part === unlocked && unlocked <= totalParts) {
+    next.unlockedUpToPart = unlocked + 1; // length+1 means course complete
+  }
+  return { meta: next, passed, pct };
+}
+
+// Scenarios eligible for practice weaving: only after 3+ parts are unlocked,
+// and never before every referenced topic has been studied (min_part_required).
+export function eligibleScenarios(questions, unlockedUpToPart) {
+  if ((unlockedUpToPart || 1) < SCENARIO_WEAVE_MIN_PARTS) return [];
+  return questions.filter(
+    (q) => q.kind === "scenario" && q.min_part_required < unlockedUpToPart
+  );
+}
+
+// Pick 1-2 eligible scenarios to weave into a practice/review session.
+export function pickSessionScenarios(questions, unlockedUpToPart, rand = Math.random) {
+  const pool = eligibleScenarios(questions, unlockedUpToPart);
+  if (pool.length === 0) return [];
+  const arr = [...pool];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, Math.min(2, arr.length));
 }
 
 // ---- Final assessment ----
@@ -116,8 +153,9 @@ export function sampleQuestions(questions, difficulty, n, rand = Math.random) {
   return arr.slice(0, n);
 }
 
-// Final-test level sample: weaves cross-concept scenarios into every level —
-// up to 4 scenarios (of the level's difficulty), the rest single-concept questions.
+// Final-test level sample. Levels 1-2 weave in up to 2 scenarios; Level 3
+// (expert/integration) draws PRIMARILY from the scenario bank — 8 of 12
+// cross-concept scenarios, topped up with single-concept difficulty-3 questions.
 export function sampleLevelQuestions(questions, levelCfg, rand = Math.random) {
   const shuffle = (arr) => {
     const a = [...arr];
@@ -127,24 +165,10 @@ export function sampleLevelQuestions(questions, levelCfg, rand = Math.random) {
     }
     return a;
   };
-  const scen = shuffle(questions.filter((q) => q.kind === "scenario" && q.difficulty === levelCfg.difficulty)).slice(0, 4);
+  const scenTarget = levelCfg.level === 3 ? 8 : 2;
+  const scen = shuffle(questions.filter((q) => q.kind === "scenario" && q.difficulty === levelCfg.difficulty)).slice(0, scenTarget);
   const rest = shuffle(questions.filter((q) => q.kind === "concept" && q.difficulty === levelCfg.difficulty)).slice(0, levelCfg.questions - scen.length);
   return shuffle([...scen, ...rest]);
-}
-
-// Review weaving: once a concept has been answered correctly at least once,
-// alternate its practice between the base question and linked scenarios that
-// are already unlocked (taught on or before the learner's current day).
-export function pickReviewQuestion(conceptId, state, questionsByConcept, allQuestions, currentDay) {
-  const base = questionsByConcept[conceptId][0];
-  if (!state || state.reps < 1) return base;
-  const linked = allQuestions.filter(
-    (q) => q.kind === "scenario" && q.concept_ids.includes(conceptId) && q.day_assigned <= currentDay
-  );
-  if (linked.length === 0) return base;
-  // rotate: base, scenario, base, scenario... keyed by total attempts
-  if (state.attempts % 2 === 1) return linked[Math.floor(state.attempts / 2) % linked.length];
-  return base;
 }
 
 export function levelPassed(levelCfg, correct, total) {

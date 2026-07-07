@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 
 export default function Settings({ app }) {
-  const { doExport, doImport, resetProgress, derived } = app;
+  const { doExport, doImport, resetProgress, derived, settings, updateSettings } = app;
   const fileRef = useRef(null);
   const [msg, setMsg] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
@@ -43,11 +43,16 @@ export default function Settings({ app }) {
       <header className="apphead"><h1>Settings</h1></header>
 
       <div className="card">
-        <h3>Course pace</h3>
+        <h3>Pass threshold</h3>
         <p className="csec">
-          The course is self-paced: finish a lesson (Study → Quiz) to unlock the next day.
-          Do one lesson a day for the intended 21-day rhythm, or binge ahead — reviews stay on their own spaced schedule either way.
+          Day Quiz score required to unlock the next part. The course is fully self-paced —
+          no calendar locking; parts open only by passing.
         </p>
+        <div className="stepper">
+          <button className="btn" onClick={() => updateSettings({ passThreshold: Math.max(50, settings.passThreshold - 5) })}>−</button>
+          <span className="stepper-val">{settings.passThreshold}%</span>
+          <button className="btn" onClick={() => updateSettings({ passThreshold: Math.min(100, settings.passThreshold + 5) })}>+</button>
+        </div>
       </div>
 
       <div className="card">
@@ -85,9 +90,9 @@ export default function Settings({ app }) {
         <h3>About</h3>
         <p className="csec">
           Personal offline course built from your AI/RAG learning documents.
-          169 topics · 202 questions (incl. 33 cross-concept scenarios) · 21 sequential lessons in 5 parts ·
-          Study→Quiz flow · simplified SM-2 spaced repetition.
-          All data stays in this device's IndexedDB — no network calls, no analytics, no account.
+          169 topics thematically clustered into 23 gated parts (5 modules) · 202 questions incl. a 33-question
+          cross-part scenario bank · Study→Quiz flow with score-gated unlocking · SM-2 spaced repetition as the
+          separate true-mastery measure. All data stays in this device's IndexedDB — no network calls, no analytics, no account.
         </p>
       </div>
     </div>

@@ -4,11 +4,12 @@ A personal, single-user quiz & spaced-repetition app generated from your two lea
 documents (`AI_TECHNICAL_GLOSSARY.md` + `SW_Engineering_and_Agentic_AI_Guide.md`).
 
 - **169 concepts** (133 from your source + 36 web-researched 2026 enhancements)
-- **202 MCQs**: 169 topic questions (every concept covered) + **33 cross-concept scenario questions**, each with a full why-right/why-wrong explanation
-- **Institute-style sequential course**: 21 lessons in 5 parts following the documents section by section (Part 1 AI & RAG Foundations → Part 2 Retrieval & Systems → Part 3 Software Engineering → Part 4 Agentic AI → Part 5 2026 Frontier)
-- **Study mode**: each lesson is Study (read the day's topics) → Quiz (exactly those topics, in order, ending with the day's scenarios)
-- **Self-paced**: finishing a lesson unlocks the next day — one per day or binge ahead
-- **Simplified SM-2 spaced repetition**: wrong → re-queued the same day; correct → 1 day → 3 days → growing interval. Mastery = 3 consecutive correct answers on 3 different days. Review practice alternates topic questions with unlocked scenarios.
+- **202 MCQs**: 169 topic questions (every concept covered) + a **33-question cross-part Scenario Bank**, each with a full why-right/why-wrong explanation
+- **Thematic gated course**: concepts clustered by theme/dependency (not document order) into **23 parts across 5 modules**, sequenced foundational-first
+- **Study Mode**: tap through the part's topic cards one by one; "Start Quiz" appears only after the last card. The Day Quiz then asks exactly those topics, in the same order — no scenarios mixed in
+- **Score-gated, self-paced**: no calendar locking; `unlocked_up_to_part` lives in IndexedDB and Part N+1 opens only when Part N's Day Quiz scores ≥ 80% (configurable in Settings). Fail → re-study → retry
+- **Scenario weaving**: each scenario is tagged `min_part_required`; 1-2 eligible scenarios join review sessions once 3+ parts are unlocked, and Final Test Level 3 draws primarily from the Scenario Bank
+- **Dual progress metrics**: the pass/fail part gate AND SM-2 "true mastery" (3 correct answers on 3 different days per topic) are tracked and shown separately
 - **30-minute final assessment**: 3 levels × 10 min, pass gates 90% / 85% / 80%
 - **All data in IndexedDB** on the device. No backend, no login, no analytics, zero runtime network calls.
 - **Export / Import progress as JSON** (Settings) — your backup against iOS Safari's ~7-day storage eviction.

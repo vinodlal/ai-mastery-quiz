@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import QuestionCard from "../components/QuestionCard.jsx";
 import { questionsByConcept, conceptById, QUESTIONS } from "../lib/store.js";
-import { masteryPercent, pickReviewQuestion } from "../lib/scheduler.js";
+import { masteryPercent, pickSessionScenarios, SCENARIO_WEAVE_MIN_PARTS } from "../lib/scheduler.js";
 
-// Review Queue: quizzes every due concept. Practice alternates between the
-// concept's base question and unlocked cross-concept scenarios that include it.
-// Wrong answers go to the back of the queue (SM-2 re-queues them the same day).
+// Review Queue: quizzes every due concept with its base question. Once 3+
+// parts are unlocked, 1-2 eligible cross-part scenarios (min_part_required
+// already studied) are woven into each session. Wrong concept answers go to
+// the back of the queue; scenarios appear once per session.
 export default function ReviewQueue({ app, go }) {
-  const [queue, setQueue] = useState(null); // array of concept ids
+  const [queue, setQueue] = useState(null); // items: {type:'concept', id} | {type:'scenario', q}
   const [count, setCount] = useState(0);
   const [qKey, setQKey] = useState(0);
   const [lastCorrect, setLastCorrect] = useState(null);
 
   const due = app.derived.due;
+  const unlocked = app.meta.unlockedUpToPart;
 
   if (!queue) {
+    const woven = pickSessionScenarios(QUESTIONS, unlocked).length;
     return (
       <div className="screen">
         <header className="apphead"><h1>Review Queue</h1><span className="subtitle">spaced repetition</span></header>
@@ -22,12 +25,15 @@ export default function ReviewQueue({ app, go }) {
           {due.length === 0 ? (
             <>
               <h3>Queue clear ✅</h3>
-              <p>No reviews due right now. Correct answers push topics further into the future; wrong answers bring them back the same day. Repeat topics sometimes appear as cross-concept scenarios.</p>
+              <p>No reviews due right now. Correct answers push topics further into the future; wrong answers bring them back the same day.</p>
+              {unlocked < SCENARIO_WEAVE_MIN_PARTS && (
+                <p className="csec">🧩 Cross-part scenario questions join your practice once you've unlocked {SCENARIO_WEAVE_MIN_PARTS}+ parts.</p>
+              )}
               <button className="btn btn-primary" onClick={() => go("home")}>Dashboard</button>
             </>
           ) : (
             <>
-              <h3>{due.length} topic{due.length === 1 ? "" : "s"} due</h3>
+              <h3>{due.length} topic{due.length === 1 ? "" : "s"} due{woven > 0 ? ` + ${woven} scenario${woven === 1 ? "" : "s"}` : ""}</h3>
               <ul className="concept-list">
                 {due.slice(0, 8).map((s) => {
                   const c = conceptById[s.conceptId];
@@ -40,7 +46,19 @@ export default function ReviewQueue({ app, go }) {
                 })}
                 {due.length > 8 && <li><span className="csec">…and {due.length - 8} more</span></li>}
               </ul>
-              <button className="btn btn-primary" onClick={() => { setQueue(due.map((s) => s.conceptId)); setCount(0); }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  const conceptItems = due.map((s) => ({ type: "concept", id: s.conceptId }));
+                  const scenarioItems = pickSessionScenarios(QUESTIONS, unlocked).map((q) => ({ type: "scenario", q }));
+                  // weave: one scenario mid-session, one at the end
+                  const mid = Math.ceil(conceptItems.length / 2);
+                  const woven2 = [...conceptItems.slice(0, mid), ...(scenarioItems[0] ? [scenarioItems[0]] : []),
+                                  ...conceptItems.slice(mid), ...(scenarioItems[1] ? [scenarioItems[1]] : [])];
+                  setQueue(woven2);
+                  setCount(0);
+                }}
+              >
                 Start Review
               </button>
             </>
@@ -63,20 +81,19 @@ export default function ReviewQueue({ app, go }) {
     );
   }
 
-  const conceptId = queue[0];
-  const state = app.states[conceptId];
-  const q = pickReviewQuestion(conceptId, state, questionsByConcept, QUESTIONS, app.derived.currentDay);
-  const concept = conceptById[conceptId];
-  const isScenario = q.kind === "scenario";
+  const item = queue[0];
+  const isScenario = item.type === "scenario";
+  const q = isScenario ? item.q : questionsByConcept[item.id][0];
+  const concept = conceptById[q.concept_id];
 
   return (
     <div className="screen">
       <header className="apphead">
         <h1>Review</h1>
-        <span className="subtitle">{queue.length} left · {isScenario ? `🧩 scenario (${concept.name})` : concept.name}</span>
+        <span className="subtitle">{queue.length} left · {isScenario ? "🧩 cross-part scenario" : concept.name}</span>
       </header>
       <QuestionCard
-        key={`${conceptId}-${qKey}`}
+        key={`${isScenario ? q.id : item.id}-${qKey}`}
         question={q}
         index={count}
         total={count + queue.length}
@@ -88,7 +105,8 @@ export default function ReviewQueue({ app, go }) {
           setCount((c) => c + 1);
           setQueue((qu) => {
             const rest = qu.slice(1);
-            return lastCorrect ? rest : [...rest, conceptId];
+            // wrong CONCEPT answers re-queue; scenarios run once per session
+            return lastCorrect || isScenario ? rest : [...rest, item];
           });
           setQKey((k) => k + 1);
           setLastCorrect(null);

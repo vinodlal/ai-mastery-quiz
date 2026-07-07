@@ -1,114 +1,97 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import QuestionCard from "../components/QuestionCard.jsx";
-import { CURRICULUM, conceptById, lessonQuestions, partTitle, scenariosByDay } from "../lib/store.js";
+import { PARTS, conceptById, partQuizQuestions, moduleTitle } from "../lib/store.js";
 
-// Institute-style lesson flow for the current day:
-// Syllabus -> Study (read today's topics) -> Quiz (exactly those topics, in order) -> Done.
+// Gated lesson flow for the current part:
+// Syllabus -> Study Mode (tap through topic cards; "Start Quiz" only after the
+// last card) -> Day Quiz (exactly those topics, same order, no scenarios) ->
+// pass (>= threshold) unlocks the next part, fail loops back to Study Mode.
 export default function Lesson({ app, go }) {
-  const { derived } = app;
-  const [phase, setPhase] = useState("overview"); // overview | study | quiz | done
+  const { derived, settings } = app;
+  const [phase, setPhase] = useState("overview"); // overview | study | quiz | result
+  const [cardIdx, setCardIdx] = useState(0);
   const [qs, setQs] = useState([]);
   const [i, setI] = useState(0);
   const [results, setResults] = useState([]);
-  // Snapshot of the day being quizzed — derived.currentDay advances the moment
-  // the lesson completes, so labels must not read it mid-session.
-  const [activeDay, setActiveDay] = useState(null);
+  // Score is read synchronously from this ref at submit time — React state
+  // updates lag behind async persistence, and a fast "Next" tap must not
+  // lose points (same pattern as FinalTest's answersRef).
+  const resultsRef = useRef([]);
+  const [activePart, setActivePart] = useState(null);
+  const [outcome, setOutcome] = useState(null);
 
-  const day = phase === "quiz" && activeDay ? activeDay : derived.currentDay;
-  const lesson = derived.lesson;
+  const part = phase === "overview" ? derived.part : (activePart || derived.part);
 
   if (derived.courseComplete && phase === "overview") {
     return (
       <div className="screen">
-        <header className="apphead"><h1>Course</h1><span className="subtitle">all 21 lessons complete</span></header>
+        <header className="apphead"><h1>Course</h1><span className="subtitle">all {derived.totalParts} parts passed</span></header>
         <div className="card center-text">
           <h2>🎓 Course complete!</h2>
-          <p>Keep clearing reviews to reach 100% mastery, then take the Final Test.</p>
+          <p>Every part passed at {settings.passThreshold}%+. Keep clearing reviews for true mastery, then take the Final Test.</p>
           <div className="btnrow">
             <button className="btn btn-primary" onClick={() => go("test")}>Final Test</button>
             <button className="btn" onClick={() => go("review")}>Review ({derived.due.length})</button>
           </div>
         </div>
-        <Syllabus completedDays={app.meta.completedDays} currentDay={22} />
+        <Syllabus app={app} />
       </div>
     );
   }
 
   if (phase === "study") {
+    const topicId = part.topics[cardIdx];
+    const c = conceptById[topicId];
+    const isLast = cardIdx === part.topics.length - 1;
     return (
       <div className="screen">
         <header className="apphead">
-          <h1>Day {day} · Study</h1>
-          <span className="subtitle">{lesson.title}</span>
+          <h1>Part {part.part} · Study</h1>
+          <span className="subtitle">{part.title}</span>
         </header>
-        <div className="card hint"><p>📖 Read each topic below. The quiz that follows asks about exactly these topics, in this order.</p></div>
-        {lesson.concept_ids.map((id, n) => {
-          const c = conceptById[id];
-          return (
-            <div className="card" key={id}>
-              <div className="study-head">
-                <span className="badge">{n + 1} / {lesson.concept_ids.length}</span>
-                <span className="csec">{c.sections.join(" · ")}</span>
-              </div>
-              <h2 className="study-title">{c.name}</h2>
-              <p>{c.summary}</p>
-              {c.formula && <code className="formula">{c.formula}</code>}
-              {c.update_2026 && <p className="update-note">🆕 {c.update_2026}</p>}
-            </div>
-          );
-        })}
-        {(scenariosByDay[day] || []).length > 0 && (
-          <div className="card hint"><p>🧩 The quiz ends with {(scenariosByDay[day] || []).length} scenario question{(scenariosByDay[day] || []).length === 1 ? "" : "s"} combining today's topics with earlier material.</p></div>
-        )}
-        <button
-          className="btn btn-primary btn-block"
-          onClick={async () => {
-            await app.markStudied(day);
-            setActiveDay(day);
-            setQs(lessonQuestions(day));
-            setI(0); setResults([]);
-            setPhase("quiz");
-          }}
-        >
-          I've read it — start the quiz ({lessonQuestions(day).length} questions)
-        </button>
+        <div className="card">
+          <div className="study-head">
+            <span className="badge">Topic {cardIdx + 1} / {part.topics.length}</span>
+            <span className="csec">{c.sections.join(" · ")}</span>
+          </div>
+          <h2 className="study-title">{c.name}</h2>
+          <p>{c.summary}</p>
+          {c.formula && <code className="formula">{c.formula}</code>}
+          {c.update_2026 && <p className="update-note">🆕 {c.update_2026}</p>}
+        </div>
+        <div className="study-progress">
+          {part.topics.map((_, n) => <span key={n} className={`dot ${n < cardIdx ? "dot-done" : n === cardIdx ? "dot-now" : ""}`} />)}
+        </div>
+        <div className="btnrow">
+          {cardIdx > 0 && <button className="btn" onClick={() => setCardIdx(cardIdx - 1)}>Back</button>}
+          {!isLast && <button className="btn btn-primary" onClick={() => setCardIdx(cardIdx + 1)}>Next topic</button>}
+          {isLast && (
+            <button
+              className="btn btn-primary"
+              onClick={async () => {
+                await app.markStudied(part.part);
+                setQs(partQuizQuestions(part.part));
+                setI(0); setResults([]);
+                resultsRef.current = [];
+                setPhase("quiz");
+              }}
+            >
+              Start Quiz ({part.topics.length} questions)
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
   if (phase === "quiz") {
-    if (i >= qs.length) {
-      const correct = results.filter(Boolean).length;
-      return (
-        <div className="screen">
-          <header className="apphead"><h1>Day {day} complete</h1></header>
-          <div className="card center-text">
-            <h2>Lesson finished 🎉</h2>
-            <p className="bigscore">{correct} / {qs.length}</p>
-            <p>
-              {correct === qs.length
-                ? "Perfect score! Everything is scheduled for spaced review."
-                : "Missed items were re-queued for review today — clear them to lock the learning in."}
-            </p>
-            <p className="csec">{day < 21 ? `Day ${day + 1} is now unlocked. Continue now or come back later — the course is self-paced.` : "That was the final lesson!"}</p>
-            <div className="btnrow">
-              {app.derived.due.length > 0 && (
-                <button className="btn btn-primary" onClick={() => go("review")}>Review misses ({app.derived.due.length})</button>
-              )}
-              <button className="btn" onClick={() => { setPhase("overview"); go("home"); }}>Dashboard</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
     const q = qs[i];
-    const isScenario = q.kind === "scenario";
     const concept = conceptById[q.concept_id];
     return (
       <div className="screen">
         <header className="apphead">
-          <h1>Day {day} · Quiz</h1>
-          <span className="subtitle">{isScenario ? "🧩 cross-concept scenario" : concept.name}</span>
+          <h1>Part {part.part} · Day Quiz</h1>
+          <span className="subtitle">{concept.name}</span>
         </header>
         <QuestionCard
           key={q.id}
@@ -116,60 +99,107 @@ export default function Lesson({ app, go }) {
           index={i}
           total={qs.length}
           onAnswered={async (idx) => {
-            const ok = await app.answerQuestion(q, idx, "lesson");
-            setResults((r) => [...r, ok]);
+            const ok = idx === q.correct_index; // known synchronously
+            resultsRef.current = [...resultsRef.current, ok];
+            setResults(resultsRef.current);
+            await app.answerQuestion(q, idx, "lesson");
           }}
           onNext={async () => {
-            if (i + 1 >= qs.length) await app.completeLesson(day);
-            setI(i + 1);
+            if (i + 1 >= qs.length) {
+              const correct = resultsRef.current.filter(Boolean).length;
+              const res = await app.submitQuizResult(part.part, correct, qs.length);
+              setOutcome(res);
+              setPhase("result");
+            } else {
+              setI(i + 1);
+            }
           }}
-          nextLabel={i + 1 >= qs.length ? "Finish lesson" : "Next"}
+          nextLabel={i + 1 >= qs.length ? "Finish quiz" : "Next"}
         />
       </div>
     );
   }
 
-  // overview: current lesson + full syllabus
+  if (phase === "result") {
+    const correct = results.filter(Boolean).length;
+    const passed = outcome && outcome.passed;
+    return (
+      <div className="screen">
+        <header className="apphead"><h1>Part {part.part} result</h1></header>
+        <div className="card center-text">
+          <h2>{passed ? "✅ Part passed!" : "❌ Not yet"}</h2>
+          <p className="bigscore">{outcome ? outcome.pct : 0}%</p>
+          <p>{correct} / {results.length} correct — pass mark {settings.passThreshold}%.</p>
+          {passed ? (
+            <p className="csec">
+              {part.part < derived.totalParts
+                ? `Part ${part.part + 1} is unlocked. Missed topics were queued for spaced review.`
+                : "That was the final part — the whole course is unlocked!"}
+            </p>
+          ) : (
+            <p className="csec">Re-read the study cards and retry — the gate stays at Part {part.part} until you score {settings.passThreshold}%+. Missed topics are also in the review queue.</p>
+          )}
+          <div className="btnrow">
+            {!passed && (
+              <button className="btn btn-primary" onClick={() => { setCardIdx(0); setPhase("study"); }}>
+                Review Study Mode again
+              </button>
+            )}
+            {passed && app.derived.due.length > 0 && (
+              <button className="btn btn-primary" onClick={() => go("review")}>Review misses ({app.derived.due.length})</button>
+            )}
+            <button className="btn" onClick={() => { setPhase("overview"); setActivePart(null); go("home"); }}>Dashboard</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // overview
+  const attempts = app.meta.studied[part.part] || 0;
+  const lastScore = app.meta.partScores[part.part];
   return (
     <div className="screen">
-      <header className="apphead"><h1>Learn</h1><span className="subtitle">self-paced · Part {lesson.part}: {partTitle(lesson.part)}</span></header>
+      <header className="apphead"><h1>Learn</h1><span className="subtitle">self-paced · pass {settings.passThreshold}% to unlock the next part</span></header>
       <div className="card">
         <div className="lesson-now">
-          <span className="badge">Day {day} / 21</span>
-          <span className={`phasechip phase-${Math.min(3, lesson.part)}`}>Part {lesson.part} · {partTitle(lesson.part)}</span>
+          <span className="badge">Part {part.part} / {derived.totalParts}</span>
+          <span className={`phasechip phase-${((part.module - 1) % 3) + 1}`}>Module {part.module} · {moduleTitle(part.module)}</span>
         </div>
-        <h2>{lesson.title}</h2>
-        <p className="csec">{lesson.sections.join(" · ")}</p>
+        <h2>{part.title}</h2>
+        <p className="csec">{part.theme}</p>
         <p>
-          {lesson.concept_ids.length} topics to study, then a {lessonQuestions(day).length}-question quiz
-          ({(scenariosByDay[day] || []).length > 0 ? `incl. ${(scenariosByDay[day] || []).length} scenario` : "topic questions"}) in the same order.
+          📖 {part.topics.length} topic cards, then a {part.topics.length}-question Day Quiz on exactly those topics, in the same order.
+          {lastScore != null && !derived.courseComplete && ` Last attempt: ${lastScore}%.`}
         </p>
-        <button className="btn btn-primary btn-block" onClick={() => setPhase("study")}>
-          {derived.lessonStudied ? "Continue Day " + day : "Start Day " + day}
+        <button className="btn btn-primary btn-block" onClick={() => { setActivePart(part); setCardIdx(0); setPhase("study"); }}>
+          {attempts > 0 ? "Retry" : "Start"} Part {part.part}
         </button>
       </div>
-      <Syllabus completedDays={app.meta.completedDays} currentDay={day} />
+      <Syllabus app={app} />
     </div>
   );
 }
 
-function Syllabus({ completedDays, currentDay }) {
-  let lastPart = 0;
+function Syllabus({ app }) {
+  const unlocked = app.meta.unlockedUpToPart;
+  let lastModule = 0;
   return (
     <div className="card">
-      <h3>Syllabus</h3>
+      <h3>Course outline</h3>
       <ul className="syllabus">
-        {CURRICULUM.map((d) => {
-          const header = d.part !== lastPart ? (lastPart = d.part, true) : false;
-          const state = d.day <= completedDays ? "done" : d.day === currentDay ? "current" : "locked";
+        {PARTS.map((p) => {
+          const header = p.module !== lastModule ? (lastModule = p.module, true) : false;
+          const state = p.part < unlocked ? "done" : p.part === unlocked ? "current" : "locked";
+          const score = app.meta.partScores[p.part];
           return (
-            <React.Fragment key={d.day}>
-              {header && <li className="syl-part">Part {d.part} — {partTitle(d.part)}</li>}
+            <React.Fragment key={p.part}>
+              {header && <li className="syl-part">Module {p.module} — {moduleTitle(p.module)}</li>}
               <li className={`syl-day syl-${state}`}>
                 <span className="syl-icon">{state === "done" ? "✅" : state === "current" ? "▶️" : "🔒"}</span>
                 <span className="syl-text">
-                  <span className="cname">Day {d.day}: {d.title}</span>
-                  <span className="csec">{d.concept_ids.length} topics{(scenariosByDay[d.day] || []).length ? ` + ${(scenariosByDay[d.day] || []).length} scenario` : ""}</span>
+                  <span className="cname">Part {p.part}: {p.title}</span>
+                  <span className="csec">{p.topics.length} topics{score != null ? ` · ${state === "done" ? "passed" : "last"} ${score}%` : ""}</span>
                 </span>
               </li>
             </React.Fragment>

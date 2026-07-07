@@ -1,9 +1,11 @@
-// Merges source + enhancement inventories, the sequential curriculum, per-concept
-// questions and the cross-concept scenario bank into the two root deliverables:
-// concept_inventory.json and question_bank.json.
-// Day assignment comes from data/src/curriculum.json (institute-style sequential
-// course). Answer options are deterministically shuffled (seeded by question id).
-// Exits non-zero on any validation failure.
+// Builds the two root deliverables from data/src/:
+//   concept_inventory.json — concepts + thematic gated curriculum (parts with
+//     ordered `topics` and matching ordered `quiz_questions`)
+//   question_bank.json     — per-concept questions + scenario bank
+// Part assignment comes from data/src/curriculum.json (thematic clusters,
+// foundational-first). Scenarios get min_part_required = highest part among
+// their linked concepts. Answer options are deterministically shuffled
+// (seeded by question id). Exits non-zero on any validation failure.
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -29,29 +31,47 @@ for (const c of concepts) {
   if (upd) c.update_2026 = upd;
 }
 const byId = Object.fromEntries(concepts.map((c) => [c.id, c]));
-
-// ---- curriculum-driven day assignment ----
-const dayOf = {};
-const seen = new Set();
-for (const d of curriculum.days) {
-  if (!(d.day >= 1 && d.day <= 21)) errors.push(`Curriculum: bad day ${d.day}`);
-  for (const id of d.concept_ids) {
-    if (!byId[id]) errors.push(`Curriculum day ${d.day} references unknown concept ${id}`);
-    if (seen.has(id)) errors.push(`Curriculum: ${id} assigned to more than one day`);
-    seen.add(id);
-    dayOf[id] = d.day;
-  }
+const questionByConcept = {};
+for (const q of conceptQuestions) {
+  if (questionByConcept[q.concept_id]) errors.push(`Concept ${q.concept_id} has more than one question (${q.id})`);
+  questionByConcept[q.concept_id] = q;
 }
+
+// ---- thematic part assignment ----
+const partOf = {};
+const seen = new Set();
+const parts = [...curriculum.parts].sort((a, b) => a.part - b.part);
+parts.forEach((p, i) => {
+  if (p.part !== i + 1) errors.push(`Parts must be sequential 1..N (found ${p.part} at position ${i + 1})`);
+  if (!p.title || !p.theme) errors.push(`Part ${p.part} missing title/theme`);
+  if (!Array.isArray(p.topics) || p.topics.length === 0) errors.push(`Part ${p.part} has no topics`);
+  for (const id of p.topics) {
+    if (!byId[id]) errors.push(`Part ${p.part} references unknown concept ${id}`);
+    if (seen.has(id)) errors.push(`Concept ${id} appears in more than one part`);
+    seen.add(id);
+    partOf[id] = p.part;
+  }
+});
 for (const c of concepts) {
   if (!seen.has(c.id)) errors.push(`Concept ${c.id} (${c.name}) missing from curriculum`);
-  c.day_assigned = dayOf[c.id];
-  c.part = (curriculum.days.find((d) => d.day === c.day_assigned) || {}).part;
+  c.part_assigned = partOf[c.id];
+  c.day_assigned = partOf[c.id]; // kept for backwards compatibility: 1 part = 1 day
 }
-// parts must be sequential day over day
-let lastPart = 0;
-for (const d of [...curriculum.days].sort((a, b) => a.day - b.day)) {
-  if (d.part < lastPart) errors.push(`Curriculum: day ${d.day} part ${d.part} goes backwards`);
-  lastPart = d.part;
+// modules must cover parts contiguously and in order
+let lastEnd = 0;
+for (const m of curriculum.meta.modules) {
+  if (m.parts[0] !== lastEnd + 1) errors.push(`Module ${m.module} does not start at part ${lastEnd + 1}`);
+  lastEnd = m.parts[1];
+}
+if (lastEnd !== parts.length) errors.push(`Modules cover ${lastEnd} parts but there are ${parts.length}`);
+
+// ---- per-part ordered quiz list: one question per topic, SAME order ----
+for (const p of parts) {
+  p.quiz_questions = p.topics.map((id) => {
+    const q = questionByConcept[id];
+    if (!q) errors.push(`Part ${p.part}: topic ${id} has no question`);
+    return q ? q.id : null;
+  });
 }
 
 // ---- deterministic option shuffle (seeded by question id) ----
@@ -74,24 +94,30 @@ for (const q of conceptQuestions) {
   if (!c) { errors.push(`Question ${q.id} references unknown concept ${q.concept_id}`); continue; }
   q.kind = "concept";
   q.concept_ids = [q.concept_id];
-  q.day_assigned = c.day_assigned;
+  q.part_assigned = c.part_assigned;
+  q.day_assigned = c.part_assigned;
   q.source_type = c.source_type;
   shuffleOptions(q);
 }
 
-// ---- scenarios (cross-concept) ----
+// ---- scenario bank (cross-concept, gated by min_part_required) ----
 for (const s of scenarios) {
   s.kind = "scenario";
   s.source_type = "scenario";
-  s.concept_id = s.concept_ids[0]; // primary, for schema compatibility
-  let maxDay = 0;
+  s.concept_id = s.concept_ids[0];
+  if (!Array.isArray(s.concept_ids) || s.concept_ids.length < 2) errors.push(`Scenario ${s.id} must link >=2 concepts`);
+  const partsTouched = new Set();
+  let minPart = 0;
   for (const id of s.concept_ids) {
     const c = byId[id];
     if (!c) { errors.push(`Scenario ${s.id} references unknown concept ${id}`); continue; }
-    maxDay = Math.max(maxDay, c.day_assigned);
+    partsTouched.add(c.part_assigned);
+    minPart = Math.max(minPart, c.part_assigned);
   }
-  if (s.concept_ids.length < 2) errors.push(`Scenario ${s.id} must link >=2 concepts`);
-  if (s.day_assigned < maxDay) errors.push(`Scenario ${s.id} scheduled day ${s.day_assigned} before its concepts are taught (needs >= ${maxDay})`);
+  s.min_part_required = minPart;
+  s.day_assigned = minPart;
+  s.part_assigned = minPart;
+  s.spans_parts = [...partsTouched].sort((a, b) => a - b);
   shuffleOptions(s);
 }
 const questions = [...conceptQuestions, ...scenarios];
@@ -103,10 +129,9 @@ for (const c of concepts) {
   conceptIds.add(c.id);
   if (!c.name || !c.summary) errors.push(`Concept ${c.id} missing name/summary`);
   if (![1, 2, 3].includes(c.phase)) errors.push(`Concept ${c.id} bad phase`);
-  if (!Array.isArray(c.sections) || c.sections.length === 0) errors.push(`Concept ${c.id} missing sections`);
 }
 const covered = new Set(conceptQuestions.map((q) => q.concept_id));
-for (const c of concepts) if (!covered.has(c.id)) errors.push(`Concept ${c.id} (${c.name}) has NO mapped concept question`);
+for (const c of concepts) if (!covered.has(c.id)) errors.push(`Concept ${c.id} (${c.name}) has NO mapped question`);
 
 const qIds = new Set(); const qTexts = new Set();
 for (const q of questions) {
@@ -120,22 +145,22 @@ for (const q of questions) {
   if (!(Number.isInteger(q.correct_index) && q.correct_index >= 0 && q.correct_index <= 3)) errors.push(`${q.id}: bad correct_index`);
   if (!q.explanation || q.explanation.trim().length < 40) errors.push(`${q.id}: missing/short explanation`);
   if (![1, 2, 3].includes(q.difficulty)) errors.push(`${q.id}: bad difficulty`);
-  if (!(q.day_assigned >= 1 && q.day_assigned <= 21)) errors.push(`${q.id}: bad day_assigned`);
   if (!q.question_text || q.question_text.trim().length < 10) errors.push(`${q.id}: missing question_text`);
 }
-for (let day = 1; day <= 21; day++) {
-  if (!curriculum.days.some((d) => d.day === day && d.concept_ids.length > 0)) errors.push(`Day ${day} has no concepts assigned`);
+// scenario bank must sustain a scenario-driven Final Level 3 and weaving pools
+const scenD3 = scenarios.filter((s) => s.difficulty === 3).length;
+if (scenD3 < 8) errors.push(`Only ${scenD3} difficulty-3 scenarios (need >=8: Level 3 draws primarily from the scenario bank)`);
+for (const d of [1, 2]) {
+  const n = scenarios.filter((s) => s.difficulty === d).length;
+  if (n < 2) errors.push(`Only ${n} difficulty-${d} scenarios (need >=2 for level weaving)`);
 }
-// scenario weaving coverage: every day from 2..21 has at least one scenario
-for (let day = 2; day <= 21; day++) {
-  if (!scenarios.some((s) => s.day_assigned === day)) errors.push(`Day ${day} has no scenario woven in`);
-}
-// final-test pool sanity: 8 concept + 4 scenario questions per level
 for (const d of [1, 2, 3]) {
-  const cq = conceptQuestions.filter((q) => q.difficulty === d).length;
-  const sq = scenarios.filter((s) => s.difficulty === d).length;
-  if (cq < 8) errors.push(`Only ${cq} concept questions at difficulty ${d} (need >=8 for final)`);
-  if (sq < 4) errors.push(`Only ${sq} scenarios at difficulty ${d} (need >=4 for final)`);
+  const n = conceptQuestions.filter((q) => q.difficulty === d).length;
+  if (n < 8) errors.push(`Only ${n} concept questions at difficulty ${d}`);
+}
+// scenarios must become eligible at some point (min_part within course)
+for (const s of scenarios) {
+  if (!(s.min_part_required >= 1 && s.min_part_required <= parts.length)) errors.push(`${s.id}: bad min_part_required`);
 }
 
 if (errors.length) {
@@ -149,9 +174,10 @@ writeFileSync(join(root, "concept_inventory.json"), JSON.stringify({
     ...srcInv.meta,
     enhancement_meta: enhInv.meta,
     total_concepts: concepts.length,
-    course: curriculum.meta.parts,
+    total_parts: parts.length,
+    modules: curriculum.meta.modules,
   },
-  curriculum: curriculum.days,
+  curriculum: parts,
   concepts,
 }, null, 2));
 writeFileSync(join(root, "question_bank.json"), JSON.stringify({
@@ -164,7 +190,7 @@ writeFileSync(join(root, "question_bank.json"), JSON.stringify({
   questions,
 }, null, 2));
 
-const perDay = curriculum.days.map((d) => `${d.day}:${d.concept_ids.length}+${scenarios.filter((s) => s.day_assigned === d.day).length}s`).join(" ");
-console.log(`OK: ${concepts.length} concepts, ${conceptQuestions.length} concept questions + ${scenarios.length} scenarios = ${questions.length} total.`);
-console.log(`Per-day (concepts+scenarios): ${perDay}`);
-console.log(`Scenario difficulty pools: d1=${scenarios.filter(s=>s.difficulty===1).length} d2=${scenarios.filter(s=>s.difficulty===2).length} d3=${scenarios.filter(s=>s.difficulty===3).length}`);
+console.log(`OK: ${concepts.length} concepts in ${parts.length} thematic parts (${curriculum.meta.modules.length} modules); ${conceptQuestions.length} concept questions + ${scenarios.length} scenarios.`);
+console.log(`Part sizes: ${parts.map((p) => `${p.part}:${p.topics.length}`).join(" ")}`);
+console.log(`Scenario min_part spread: ${scenarios.map((s) => s.min_part_required).sort((a, b) => a - b).join(",")}`);
+console.log(`Scenario difficulty pools: d1=${scenarios.filter(s=>s.difficulty===1).length} d2=${scenarios.filter(s=>s.difficulty===2).length} d3=${scenD3}`);

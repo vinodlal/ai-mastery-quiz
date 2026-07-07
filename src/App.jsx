@@ -13,6 +13,7 @@ const TABS = [
   { id: "review", label: "Review", icon: "🔁" },
   { id: "progress", label: "Progress", icon: "📊" },
   { id: "test", label: "Final", icon: "🎓" },
+
   { id: "settings", label: "Settings", icon: "⚙️" },
 ];
 
